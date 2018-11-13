@@ -46,7 +46,7 @@ public class Principal extends JFrame {
     DefaultTableModel dtmAutomation;
     JScrollPane scrollTable;
     String colTable[] = {"Orden", "Base", "Hombro", "Codo", "Muñeca", "Mano"};
-    JButton btnAbort,btnResume;
+    JButton btnAdd,btnDelete,btnAbort,btnResume;
     
     JLabel lblImgBackground;
     JLabel lblRoboticArm;
@@ -207,12 +207,22 @@ public class Principal extends JFrame {
         tableAutomation.getTableHeader().setReorderingAllowed(false);
         scrollTable = new JScrollPane(tableAutomation);
         scrollTable.setBounds(10, 210, 380,120);
+        btnAdd = new JButton("Añadir");
+        btnAdd.setFont(wordType2);
+        //btnAdd.setBounds(20, 350, 100, 30);
+        btnAdd.setBounds(20, 350, 100, 30);
+        btnDelete = new JButton("Eliminar");
+        btnDelete.setFont(wordType2);
+        //btnDelete.setBounds(280,350,100,30);
+        btnDelete.setBounds(280,350,100,30);
         btnAbort = new JButton("Abortar");
         btnAbort.setFont(wordType2);
-        btnAbort.setBounds(20,400,100,30);
+        //btnAbort.setBounds(90,500,100,30);
+        btnAbort.setBounds(20,500,100,30);
         btnResume = new JButton("Reanudar");
         btnResume.setFont(wordType2);
-        btnResume.setBounds(140,400,100,30);
+        //btnResume.setBounds(210,500,100,30);
+        btnResume.setBounds(280,500,100,30);
         lblImgBackground = new JLabel(new ImageIcon("src/images/imgBackground.jpg"));
         lblImgBackground.setBounds(400, 5, 230, 230);
 
@@ -254,6 +264,8 @@ public class Principal extends JFrame {
         pnlControl.add(rbtnManual);
         pnlControl.add(lblAutomation);
         pnlControl.add(scrollTable);
+        pnlControl.add(btnAdd);
+        pnlControl.add(btnDelete);
         pnlControl.add(btnAbort);
         pnlControl.add(btnResume);
         pnlPrincipal.add(pnlFoot);
