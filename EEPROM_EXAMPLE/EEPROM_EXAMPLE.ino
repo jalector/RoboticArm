@@ -52,8 +52,7 @@ void setup() {
 
 
 
-void loop() {   
-    
+void loop() {
     if( Serial.available() > 0){
       int character = Serial.read();
       Serial.print("Read: ");
