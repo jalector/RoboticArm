@@ -22,16 +22,27 @@ void loop() {
 
 
 void saveStatus(){
-    
+  updateStatusSize( +statusSize );
+  byte address = statusSize * 5;
+  for(byte i = address, e = 0; i < address + 5; i++, e++){
+    EEPROM.write( status[ e ], i+1 );
+  }    
 }
 
-void deleteStatus(){
-  
+void deleteStatus(){  
+  if( statusSize > 0 ){
+    byte address = statusSize * 5;
+    for(byte i = address; i < address + 5; i++){
+      EEPROM.write( 255, i+1 );
+    }
+    updateStatusSize( --statusSize );
+  }  
 }
 
 void getStatus(byte position){
-    for(byte i = position, e = 0; i < position + 5; i++, e++){
-      status[e] = EEPROM.read( i );
+    byte address = position * 5;
+    for(byte i = address, e = 0; i < address+ 5; i++, e++){
+      status[e] = EEPROM.read( i+1 );
     }
     
 }
@@ -44,7 +55,7 @@ void getStatus(byte position){
  *  @param ( newSize ) Es el nuevo valor para la cantidad
  *        de estados guardados en EEPROM.
  */
-void updateStatus( byte newSize ){
+void updateStatusSize( byte newSize ){
   EEPROM.write( newSize, addStatusSize );
 }
 
