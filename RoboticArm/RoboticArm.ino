@@ -65,7 +65,7 @@ void updateStatusSize( byte newSize ){
  *  @desc Ayuda a saber la cantidad de estados que están
  *        guardados en la memoria.
  */
-byte getStatusSize(){
+byte getStatusSize( ){
   byte amountOfStatus = EEPROM.read( addStatusSize );
   return ( amountOfStatus == 255 )? 0 : amountOfStatus;
 }
