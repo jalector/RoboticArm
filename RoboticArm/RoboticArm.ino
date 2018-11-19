@@ -8,18 +8,40 @@ byte status[5];
 /** variable que ayuda a conocer la cantidad de estados */
 byte statusSize;
 
+String data = "";
 void setup() {
   /** Se inicializa la cantidad de estados guardados*/
   statusSize = getStatusSize();
-
+  Serial.begin( 9600 );
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-
+  if(Serial.available()){
+    //Fijar una espera para que el arduino lea toda la información del Serial
+    delay(200);
+    while(Serial.available() > 0){      
+      //Leer loa caracteres hasta un salto de linea y guardarlos en una variable
+      data = Serial.readStringUntil('\n');
+      byte numerito =  getNumber(data,0) ;
+      Serial.println( numerito );      
+      status[0] = getNumber(data, 0);
+      status[1] = getNumber(data, 1);
+      status[2] = getNumber(data, 2);
+      status[3] = getNumber(data, 3);
+      status[4] = getNumber(data, 4);
+      
+    }    
+  }
+  Serial.flush();
 }
 
-
+byte getNumber( String text, int pos ){
+  return (byte)
+    text.substring(
+      (pos*3), 
+      (pos*3)+3
+    ).toInt();
+}
 
 void saveStatus(){
   updateStatusSize( +statusSize );

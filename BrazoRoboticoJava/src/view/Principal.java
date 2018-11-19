@@ -19,11 +19,13 @@ import javax.swing.JTable;
 import javax.swing.UIManager;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.JOptionPane;
-import jssc.SerialPortEventListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import jssc.SerialPortEventListener;
+import jssc.SerialPortEvent;
+import jssc.SerialPortException;
 
 
 public class Principal extends JFrame {
@@ -78,6 +80,28 @@ public class Principal extends JFrame {
     private void create() {
         arduino = new PanamaHitek_Arduino( );
         multi = new PanamaHitek_MultiMessage(1, arduino);
+        
+        listener = new SerialPortEventListener() {
+            @Override
+            public void serialEvent(SerialPortEvent spe) {
+                try {
+                    if (multi.dataReceptionCompleted()) {                        
+                        //--------------------------------------------------------
+                        // Estos print sopara ver que enviá el arduino
+                        System.out.print("[UNO]: ");
+                        System.out.println(multi.getMessage(0));
+                        //--------------------------------------------------------
+                        
+                        multi.flushBuffer();
+                    }
+                } catch (ArduinoException ex) {
+                    Logger.getLogger(Principal.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (SerialPortException ex) {
+                    Logger.getLogger(Principal.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        };
+        
         btnCtrl = new ButtonController( );
         //Establecer un tipo de letra para titulos
         wordType1 = new Font("", 1, 18);
@@ -197,12 +221,27 @@ public class Principal extends JFrame {
                     if( !this.validPosition( )){
                         JOptionPane.showMessageDialog( rootPane, "Los valores deben estar entre 0 y 180.");
                     } else {
-                        /* Aquí se debe de enviar un mensaje mamalon al arduino*/
+                          System.out.println("[JAVA] "+
+                                  toTreeCharacter(txtPosFoot.getText( ))
+                                + toTreeCharacter(txtPosShoulder.getText())
+                                + toTreeCharacter(txtPosElbow.getText())
+                                + toTreeCharacter(txtPosWrist.getText())
+                                + toTreeCharacter(txtPosHand.getText())
+                                );
+                          
+                        sendArduinoInfo(
+                                toTreeCharacter(txtPosFoot.getText( ))
+                                + toTreeCharacter(txtPosShoulder.getText())
+                                + toTreeCharacter(txtPosElbow.getText())
+                                + toTreeCharacter(txtPosWrist.getText())
+                                + toTreeCharacter(txtPosHand.getText())
+                        );
+                        
                         dtmAutomation.addRow(new Object [] { 
                             tableAutomation.getRowCount()+1,
                             txtPosFoot.getText( ), 
-                            txtPosElbow.getText(), 
                             txtPosShoulder.getText(), 
+                            txtPosElbow.getText(),                            
                             txtPosWrist.getText(), 
                             txtPosHand.getText()
                         });
@@ -212,6 +251,9 @@ public class Principal extends JFrame {
                     JOptionPane.showMessageDialog(rootPane, "Debes primero llenar todos los campos para guardar");
                 }
         }
+        private String toTreeCharacter(String txt){
+           return (txt.length() == 3)? txt: (txt.length() == 1)? "00"+txt : "0"+txt;
+        }
         private boolean hasPositionValues(){
             return ( !txtPosFoot.getText( ).equals("") ) && 
                    ( !txtPosElbow.getText( ).equals("") ) && 
@@ -220,8 +262,7 @@ public class Principal extends JFrame {
                    ( !txtPosHand.getText( ).equals("") );
         }        
         private boolean validPosition ( ){
-           return ( this.isAcceptable( txtPosFoot.getText( )) && 
-                   ( this.isAcceptable( txtPosElbow.getText( ))) && 
+           return (( this.isAcceptable( txtPosElbow.getText( ))) && 
                    ( this.isAcceptable( txtPosShoulder.getText( ))) && 
                    ( this.isAcceptable( txtPosWrist.getText( ))) && 
                    ( this.isAcceptable( txtPosHand.getText( ))));
@@ -261,9 +302,18 @@ public class Principal extends JFrame {
         add(pnlPrincipal);
         try {
             //arduino.arduinoRXTX("COM7", 9600, listener);
-            arduino.arduinoRXTX("/dev/ttyUSB0", 9600, listener);
+            arduino.arduinoRXTX("/dev/ttyACM0", 9600, listener);
         } catch (ArduinoException ex) {
             Logger.getLogger(Principal.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    private void sendArduinoInfo(String message) {
+        try {
+             arduino.sendData(message);
+        } catch (Exception ex) {
+            System.err.println("Error al tratar de enviar un mensaje");
+            ex.printStackTrace();
         }
     }
 
