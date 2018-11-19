@@ -37,7 +37,7 @@ public class Principal extends JFrame {
     //Creación de componentes que se mostrarán en la vista
     Font wordType1, wordType2;
     Color backgroundBtn;
-    ImageIcon iconLeft, iconRight, iconAdd, iconDelete;
+    ImageIcon iconLeft, iconRight, iconSend, iconAdd, iconDelete;
     Rectangle robotPieces, btnLeft, btnRight;
     //Componentes para los bontones que controlan la posición del robot
     JPanel pnlPrincipal, pnlPosition;
@@ -53,7 +53,7 @@ public class Principal extends JFrame {
     DefaultTableModel dtmAutomation;
     JScrollPane scrollTable;
     String colTable[] = {"Orden", "Base", "Hombro", "Codo", "Muñeca", "Mano"};
-    JButton btnAbort, btnResume, btnAdd, btnDelete;
+    JButton btnAbort, btnResume, btnSend, btnAdd, btnDelete;
 
     JLabel lblImgBackground;
     JLabel lblRoboticArm;
@@ -110,6 +110,8 @@ public class Principal extends JFrame {
         //Establecer un fondo para los JPanel que contienen los bótones
         backgroundBtn = new Color(190, 190, 190, 150);
         //Establecer el icono de añadir estado
+        iconSend = new ImageIcon("src/image/right.png");
+        //Establecer el icono de añadir estado
         iconAdd = new ImageIcon("src/image/add.png");
         //Establecer el icono de eliminar estado
         iconDelete = new ImageIcon("src/image/delete.png");
@@ -161,13 +163,16 @@ public class Principal extends JFrame {
         rbtnAutomatic = new JRadioButton("Automatico");
         rbtnAutomatic.setFont(wordType2);
         rbtnAutomatic.setBounds(105, 110, 100, 20);
+        rbtnAutomatic.addActionListener(btnCtrl);
         rbtnManual = new JRadioButton("Manual");
         rbtnManual.setFont(wordType2);
         rbtnManual.setBounds(215, 110, 100, 20);
-        groupRbtn = new ButtonGroup();
+        rbtnManual.addActionListener(btnCtrl);
+        groupRbtn = new ButtonGroup();   
         groupRbtn.add(rbtnAutomatic);
         groupRbtn.add(rbtnManual);
         lblAutomation = new JLabel("Estados");
+        
         lblAutomation.setFont(wordType1);
         lblAutomation.setBounds(150, 170, 140, 30);
         dtmAutomation = new DefaultTableModel(null, colTable) {
@@ -180,6 +185,9 @@ public class Principal extends JFrame {
         tableAutomation.getTableHeader().setReorderingAllowed(false);
         scrollTable = new JScrollPane(tableAutomation);
         scrollTable.setBounds(10, 210, 380, 120);
+        btnSend = new JButton(iconSend);
+        btnSend.setBounds(80,350,40,40);
+        btnSend.addActionListener(btnCtrl);
         btnAdd = new JButton(iconAdd);
         btnAdd.setBounds(250, 350, 40, 40);
         btnAdd.addActionListener( btnCtrl );
@@ -205,6 +213,10 @@ public class Principal extends JFrame {
         public void actionPerformed(ActionEvent e) {
             if( e.getSource( ) == btnAdd ){ this.addStatus(); } 
             else if ( e.getSource( ) == btnDelete ) { this.deleteStatus( ); }
+            else if ( e.getSource( ) == rbtnAutomatic) { sendArduinoInfo("A"); }
+            else if ( e.getSource( ) == rbtnManual) { sendArduinoInfo("M"); }
+            else if ( e.getSource( ) == btnAbort) { sendArduinoInfo("P"); }
+            else if ( e.getSource( ) == btnResume) { sendArduinoInfo("R"); }
         }
         
         private void deleteStatus(){
@@ -292,6 +304,7 @@ public class Principal extends JFrame {
         add(rbtnManual);
         add(lblAutomation);
         add(scrollTable);
+        add(btnSend);
         add(btnAdd);
         add(btnDelete);
         add(btnAbort);
