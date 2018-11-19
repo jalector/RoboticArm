@@ -1,11 +1,10 @@
-package View;
+package view;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import com.panamahitek.PanamaHitek_Arduino;
 import com.panamahitek.PanamaHitek_MultiMessage;
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Rectangle;
@@ -18,7 +17,11 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.UIManager;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.JOptionPane;
 import jssc.SerialPortEventListener;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
 
 public class Principal extends JFrame {
 
@@ -32,10 +35,8 @@ public class Principal extends JFrame {
     ImageIcon iconLeft, iconRight, iconAdd, iconDelete;
     Rectangle robotPieces, btnLeft, btnRight;
     //Componentes para los bontones que controlan la posición del robot
-    JPanel pnlPrincipal, pnlFoot, pnlShoulder, pnlElbow, pnlWrist, pnlHand, pnlPosition, pnlControl;
-    JLabel lblFoot, lblShoulder, lblElbow, lblWrist, lblHand;
-    JButton btnLeftFoot, btnRightFoot, btnLeftShoulder, btnRightShoulder, btnLeftElbow, btnRightElbow,
-            btnLeftWrist, btnRightWrist, btnLeftHand, btnRightHand;
+    JPanel pnlPrincipal, pnlPosition;
+   
     //Componentes que muestran información sobre las instrucciones que se le darán al robot
     JLabel lblPosition, lblPosFoot, lblPosShoulder, lblPosElbow, lblPosWrist, lblPosHand;
     JTextField txtPosFoot, txtPosShoulder, txtPosElbow, txtPosWrist, txtPosHand;
@@ -51,6 +52,8 @@ public class Principal extends JFrame {
 
     JLabel lblImgBackground;
     JLabel lblRoboticArm;
+    
+    ButtonController btnCtrl;
 
     //Creación del constructor de la clase
     Principal() {
@@ -70,92 +73,32 @@ public class Principal extends JFrame {
 
     //Método create, dónde se inicializan todas las variables
     private void create() {
-        arduino = new PanamaHitek_Arduino();
+        arduino = new PanamaHitek_Arduino( );
         multi = new PanamaHitek_MultiMessage(1, arduino);
+        btnCtrl = new ButtonController( );
         //Establecer un tipo de letra para titulos
         wordType1 = new Font("", 1, 18);
         //Establecer un tipo de letra para etiquetas comunes
         wordType2 = new Font("", 0, 14);
         //Establecer un fondo para los JPanel que contienen los bótones
         backgroundBtn = new Color(190, 190, 190, 150);
-        //Establecer el icono de la flecha izquierda
-        iconLeft = new ImageIcon("src/image/left.png");
-        //Establecer el icono de la flecha derecha
-        iconRight = new ImageIcon("src/image/right.png");
         //Establecer el icono de añadir estado
         iconAdd = new ImageIcon("src/image/add.png");
         //Establecer el icono de eliminar estado
         iconDelete = new ImageIcon("src/image/delete.png");
-        //Establecer en que posición estará el titulo de cada parte del robot
-        robotPieces = new Rectangle(30, 5, 140, 30);
         //Establecer en que posición estará el botón izquierdo
         btnLeft = new Rectangle(10, 35, 40, 40);
         //Establecer en que posición estará el botón derecho
         btnRight = new Rectangle(80, 35, 40, 40);
-
+        
         pnlPrincipal = new JPanel();
         pnlPrincipal.setLayout(null);
         lblRoboticArm = new JLabel("Panel de control de brazo robotico");
-        lblRoboticArm.setFont(new Font("", 1, 25));
-        lblRoboticArm.setBounds(140, 20, 450, 60);
-        pnlFoot = new JPanel(null);
-        pnlFoot.setBackground(backgroundBtn);
-        pnlFoot.setBounds(100, 100, 130, 80);
-        lblFoot = new JLabel("Base");
-        lblFoot.setFont(wordType1);
-        lblFoot.setBounds(robotPieces);
-        btnLeftFoot = new JButton(iconLeft);
-        btnLeftFoot.setBounds(btnLeft);
-        btnRightFoot = new JButton(iconRight);
-        btnRightFoot.setBounds(btnRight);
-
-        pnlShoulder = new JPanel(null);
-        pnlShoulder.setBackground(backgroundBtn);
-        pnlShoulder.setBounds(100, 200, 130, 80);
-        lblShoulder = new JLabel("Hombro");
-        lblShoulder.setFont(wordType1);
-        lblShoulder.setBounds(robotPieces);
-        btnLeftShoulder = new JButton(iconLeft);
-        btnLeftShoulder.setBounds(btnLeft);
-        btnRightShoulder = new JButton(iconRight);
-        btnRightShoulder.setBounds(btnRight);
-
-        pnlElbow = new JPanel(null);
-        pnlElbow.setBackground(backgroundBtn);
-        pnlElbow.setBounds(100, 300, 130, 80);
-        lblElbow = new JLabel("Codo");
-        lblElbow.setFont(wordType1);
-        lblElbow.setBounds(robotPieces);
-        btnLeftElbow = new JButton(iconLeft);
-        btnLeftElbow.setBounds(btnLeft);
-        btnRightElbow = new JButton(iconRight);
-        btnRightElbow.setBounds(btnRight);
-
-        pnlWrist = new JPanel(null);
-        pnlWrist.setBackground(backgroundBtn);
-        pnlWrist.setBounds(100, 400, 130, 80);
-        lblWrist = new JLabel("Muñeca");
-        lblWrist.setFont(wordType1);
-        lblWrist.setBounds(robotPieces);
-        btnLeftWrist = new JButton(iconLeft);
-        btnLeftWrist.setBounds(btnLeft);
-        btnRightWrist = new JButton(iconRight);
-        btnRightWrist.setBounds(btnRight);
-
-        pnlHand = new JPanel(null);
-        pnlHand.setBackground(backgroundBtn);
-        pnlHand.setBounds(100, 500, 130, 80);
-        lblHand = new JLabel("Mano");
-        lblHand.setFont(wordType1);
-        lblHand.setBounds(robotPieces);
-        btnLeftHand = new JButton(iconLeft);
-        btnLeftHand.setBounds(btnLeft);
-        btnRightHand = new JButton(iconRight);
-        btnRightHand.setBounds(btnRight);
-
+        lblRoboticArm.setFont(new Font("", 1, 18));
+        lblRoboticArm.setBounds(20, 20, 450, 60);
         pnlPosition = new JPanel(null);
         pnlPosition.setBackground(backgroundBtn);
-        pnlPosition.setBounds(400, 400, 280, 140);
+        pnlPosition.setBounds(50, 400, 280, 140);
         lblPosition = new JLabel("Posición");
         lblPosition.setFont(wordType1);
         lblPosition.setBounds(5, 5, 140, 30);
@@ -184,14 +127,10 @@ public class Principal extends JFrame {
         lblPosHand.setBounds(140, 70, 70, 20);
         txtPosHand = new JTextField();
         txtPosHand.setBounds(205, 65, 50, 30);
-
         //Inicialización de los elementos que se encuentran dentro del panel de control
-        pnlControl = new JPanel(null);
-        pnlControl.setBackground(backgroundBtn);
-        pnlControl.setBounds(750, 0, 400, 650);
         lblControl = new JLabel("Control");
         lblControl.setFont(wordType1);
-        lblControl.setBounds(170, 70, 80, 30);
+        lblControl.setBounds(150, 70, 80, 30);
         rbtnAutomatic = new JRadioButton("Automatico");
         rbtnAutomatic.setFont(wordType2);
         rbtnAutomatic.setBounds(105, 110, 100, 20);
@@ -201,9 +140,9 @@ public class Principal extends JFrame {
         groupRbtn = new ButtonGroup();
         groupRbtn.add(rbtnAutomatic);
         groupRbtn.add(rbtnManual);
-        lblAutomation = new JLabel("Automatización");
+        lblAutomation = new JLabel("Estados");
         lblAutomation.setFont(wordType1);
-        lblAutomation.setBounds(135, 170, 140, 30);
+        lblAutomation.setBounds(150, 170, 140, 30);
         dtmAutomation = new DefaultTableModel(null, colTable) {
             @Override
             public boolean isCellEditable(int fila, int columna) {
@@ -216,40 +155,83 @@ public class Principal extends JFrame {
         scrollTable.setBounds(10, 210, 380, 120);
         btnAdd = new JButton(iconAdd);
         btnAdd.setBounds(250, 350, 40, 40);
+        btnAdd.addActionListener( btnCtrl );
         btnDelete = new JButton(iconDelete);
         btnDelete.setBounds(330, 350, 40, 40);
+        btnDelete.addActionListener( btnCtrl );
         btnAbort = new JButton("Abortar");
         btnAbort.setFont(wordType2);
-        btnAbort.setBounds(20, 500, 100, 30);
+        btnAbort.addActionListener( btnCtrl );
+        btnAbort.setBounds(20, 560, 100, 30);
         btnResume = new JButton("Reanudar");
         btnResume.setFont(wordType2);
-        btnResume.setBounds(280, 500, 100, 30);
+        btnResume.addActionListener( btnCtrl );
+        btnResume.setBounds(280, 560, 100, 30);
         lblImgBackground = new JLabel(new ImageIcon("src/images/imgBackground.jpg"));
         lblImgBackground.setBounds(400, 5, 230, 230);
 
         pnlPrincipal.setBounds(0, 0, 1150, 650);
     }
 
+    public class ButtonController implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            if( e.getSource( ) == btnAdd ){ this.addStatus(); } 
+            else if ( e.getSource( ) == btnDelete ) { this.deleteStatus( ); }
+        }
+        
+        private void deleteStatus(){
+            dtmAutomation.removeRow( tableAutomation.getSelectedRow() );
+        } 
+        
+        /**
+         * Verifica y añade un estado más al brazo
+         * 
+         */
+        
+        private void addStatus( ) {
+             if( this.hasPositionValues() ){
+                    if( !this.validPosition( )){
+                        JOptionPane.showMessageDialog( rootPane, "Los valores deben estar entre 0 y 180.");
+                    } else {
+                        /* Aquí se debe de enviar un mensaje mamalon al arduino*/
+                        dtmAutomation.addRow(new Object [] { 
+                            tableAutomation.getRowCount()+1,
+                            txtPosFoot.getText( ), 
+                            txtPosElbow.getText(), 
+                            txtPosShoulder.getText(), 
+                            txtPosWrist.getText(), 
+                            txtPosHand.getText()
+                        });
+                    }
+                    
+                } else {
+                    JOptionPane.showMessageDialog(rootPane, "Debes primero llenar todos los campos para guardar");
+                }
+        }
+        private boolean hasPositionValues(){
+            return ( !txtPosFoot.getText( ).equals("") ) && 
+                   ( !txtPosElbow.getText( ).equals("") ) && 
+                   ( !txtPosShoulder.getText( ).equals("") ) && 
+                   ( !txtPosWrist.getText( ).equals("") ) && 
+                   ( !txtPosHand.getText( ).equals("") );
+        }        
+        private boolean validPosition ( ){
+           return ( this.isAcceptable( txtPosFoot.getText( )) && 
+                   ( this.isAcceptable( txtPosElbow.getText( ))) && 
+                   ( this.isAcceptable( txtPosShoulder.getText( ))) && 
+                   ( this.isAcceptable( txtPosWrist.getText( ))) && 
+                   ( this.isAcceptable( txtPosHand.getText( ))));
+        }        
+        private boolean isAcceptable( String value ) {
+            int number = Integer.parseInt( value );
+            return (number <= 180) &&(number >= 0 );
+        }
+        
+    }
     //Método assemble, dónde se agregan todos los componentes a la vista
     private void assemble() {
-
         pnlPrincipal.add(lblRoboticArm);
-
-        pnlFoot.add(lblFoot);
-        pnlFoot.add(btnLeftFoot);
-        pnlFoot.add(btnRightFoot);
-        pnlShoulder.add(lblShoulder);
-        pnlShoulder.add(btnLeftShoulder);
-        pnlShoulder.add(btnRightShoulder);
-        pnlElbow.add(lblElbow);
-        pnlElbow.add(btnLeftElbow);
-        pnlElbow.add(btnRightElbow);
-        pnlWrist.add(lblWrist);
-        pnlWrist.add(btnLeftWrist);
-        pnlWrist.add(btnRightWrist);
-        pnlHand.add(lblHand);
-        pnlHand.add(btnLeftHand);
-        pnlHand.add(btnRightHand);
         pnlPosition.add(lblPosition);
         pnlPosition.add(lblPosFoot);
         pnlPosition.add(txtPosFoot);
@@ -261,22 +243,17 @@ public class Principal extends JFrame {
         pnlPosition.add(txtPosWrist);
         pnlPosition.add(lblPosHand);
         pnlPosition.add(txtPosHand);
-        pnlControl.add(lblControl);
-        pnlControl.add(rbtnAutomatic);
-        pnlControl.add(rbtnManual);
-        pnlControl.add(lblAutomation);
-        pnlControl.add(scrollTable);
-        pnlControl.add(btnAdd);
-        pnlControl.add(btnDelete);
-        pnlControl.add(btnAbort);
-        pnlControl.add(btnResume);
-        pnlPrincipal.add(pnlFoot);
-        pnlPrincipal.add(pnlShoulder);
-        pnlPrincipal.add(pnlElbow);
-        pnlPrincipal.add(pnlWrist);
-        pnlPrincipal.add(pnlHand);
+        add(lblControl);
+        add(rbtnAutomatic);
+        add(rbtnManual);
+        add(lblAutomation);
+        add(scrollTable);
+        add(btnAdd);
+        add(btnDelete);
+        add(btnAbort);
+        add(btnResume);
         pnlPrincipal.add(pnlPosition);
-        pnlPrincipal.add(pnlControl);
+        
         pnlPrincipal.add(lblImgBackground);
         add(pnlPrincipal);
 //        try {
@@ -288,11 +265,12 @@ public class Principal extends JFrame {
     }
 
     //Método launch, es el que lanza la aplicación
-    public void launch() {
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(1150, 650);
-        setVisible(true);
-        this.setResizable(false);
+    public void launch() {        
+        this.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
+        this.setSize(425, 650);
+        this.setLocationRelativeTo( null );
+        this.setResizable( false );
+        this.setVisible( true );
     }
 
     public static void main(String[] args) {
