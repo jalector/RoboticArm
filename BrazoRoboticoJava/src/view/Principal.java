@@ -179,30 +179,58 @@ public class Principal extends JFrame {
     public class ButtonController implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-            if( e.getSource( ) == btnAdd ){
-                if( this.hasPositionValues() ){
+            if( e.getSource( ) == btnAdd ){ this.addStatus(); } 
+            else if ( e.getSource( ) == btnDelete ) { this.deleteStatus( ); }
+        }
+        
+        private void deleteStatus(){
+            dtmAutomation.removeRow( tableAutomation.getSelectedRow() );
+        } 
+        
+        /**
+         * Verifica y añade un estado más al brazo
+         * 
+         */
+        
+        private void addStatus( ) {
+             if( this.hasPositionValues() ){
+                    if( !this.validPosition( )){
+                        JOptionPane.showMessageDialog( rootPane, "Los valores deben estar entre 0 y 180.");
+                    } else {
+                        /* Aquí se debe de enviar un mensaje mamalon al arduino*/
+                        dtmAutomation.addRow(new Object [] { 
+                            tableAutomation.getRowCount()+1,
+                            txtPosFoot.getText( ), 
+                            txtPosElbow.getText(), 
+                            txtPosShoulder.getText(), 
+                            txtPosWrist.getText(), 
+                            txtPosHand.getText()
+                        });
+                    }
+                    
                 } else {
                     JOptionPane.showMessageDialog(rootPane, "Debes primero llenar todos los campos para guardar");
                 }
-            }
         }
-        
-        public boolean hasPositionValues(){
+        private boolean hasPositionValues(){
             return ( !txtPosFoot.getText( ).equals("") ) && 
-                   ( !txtPosShoulder.getText( ).equals("") ) && 
                    ( !txtPosElbow.getText( ).equals("") ) && 
+                   ( !txtPosShoulder.getText( ).equals("") ) && 
                    ( !txtPosWrist.getText( ).equals("") ) && 
                    ( !txtPosHand.getText( ).equals("") );
+        }        
+        private boolean validPosition ( ){
+           return ( this.isAcceptable( txtPosFoot.getText( )) && 
+                   ( this.isAcceptable( txtPosElbow.getText( ))) && 
+                   ( this.isAcceptable( txtPosShoulder.getText( ))) && 
+                   ( this.isAcceptable( txtPosWrist.getText( ))) && 
+                   ( this.isAcceptable( txtPosHand.getText( ))));
+        }        
+        private boolean isAcceptable( String value ) {
+            int number = Integer.parseInt( value );
+            return (number <= 180) &&(number >= 0 );
         }
         
-        public boolean checkValues ( ){
-           boolean correct = false;
-           return correct;
-        }
-        
-        public boolean acceptable( String value ) {
-            return true;
-        }
     }
     //Método assemble, dónde se agregan todos los componentes a la vista
     private void assemble() {
