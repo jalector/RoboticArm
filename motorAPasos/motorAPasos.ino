@@ -1,13 +1,14 @@
 //definicion de pins
-const int motorPin1 = 8;    // 28BYJ48 In1
-const int motorPin2 = 9;    // 28BYJ48 In2
-const int motorPin3 = 10;   // 28BYJ48 In3
-const int motorPin4 = 11;   // 28BYJ48 In4
+const int motorPin1 = 10;    // 28BYJ48 In1
+const int motorPin2 = 11;    // 28BYJ48 In2
+const int motorPin3 = 12;   // 28BYJ48 In3
+const int motorPin4 = 13;   // 28BYJ48 In4
                    
 //definicion variables
 int motorSpeed = 1200;   //variable para fijar la velocidad
 int stepCounter = 0;     // contador para los pasos
-int stepsPerRev = 4076;  // pasos para dos vueltas completa
+//int stepsPerRev = 4076;  // pasos para una vuelta completa
+int stepsPerRev = 1019;
  
 //secuencia media fase
 const int numSteps = 8;
@@ -25,13 +26,13 @@ void setup()
  
 void loop(){
   //girar en sentido de las manecillas del reloj
-  for (int i = 0; i < stepsPerRev * 2; i++)
+  for (int i = 0; i < stepsPerRev; i++)
   {
     clockwise();
     delayMicroseconds(motorSpeed);
   }
   //girar en sentido contrario a las manecillas del reloj
-  for (int i = 0; i < stepsPerRev * 2; i++)
+  for (int i = 0; i < stepsPerRev; i++)
   {
     anticlockwise();
     delayMicroseconds(motorSpeed);
