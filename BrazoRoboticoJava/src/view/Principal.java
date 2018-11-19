@@ -5,6 +5,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import com.panamahitek.PanamaHitek_Arduino;
 import com.panamahitek.PanamaHitek_MultiMessage;
+import com.panamahitek.ArduinoException;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Rectangle;
@@ -21,6 +22,8 @@ import javax.swing.JOptionPane;
 import jssc.SerialPortEventListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 public class Principal extends JFrame {
@@ -228,12 +231,12 @@ public class Principal extends JFrame {
         
         pnlPrincipal.add(lblImgBackground);
         add(pnlPrincipal);
-//        try {
-//            arduino.arduinoRXTX("COM7", 9600, listener);
-//            //arduino.arduinoRXTX("/dev/ttyUSB0", 9600, listener);
-//        } catch (ArduinoException ex) {
-//            Logger.getLogger(Principal.class.getName()).log(Level.SEVERE, null, ex);
-//        }
+        try {
+            //arduino.arduinoRXTX("COM7", 9600, listener);
+            arduino.arduinoRXTX("/dev/ttyUSB0", 9600, listener);
+        } catch (ArduinoException ex) {
+            Logger.getLogger(Principal.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     //Método launch, es el que lanza la aplicación
