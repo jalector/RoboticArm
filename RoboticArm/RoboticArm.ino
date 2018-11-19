@@ -41,17 +41,21 @@ void loop() {
      * A => Modo automático, cambiamos al modo automático
      * M => Modo manual, cambiamos al modo maunual
      * P => Parar el sistema.
+     * R => Para reunudar el sistema
      */
     data = Serial.readStringUntil('\n');
     if( data == "M" ) {
       manual = true;     
     } else if ( data == "A" ){
+      manual = false;
       /** 
        * Sí el modo es autómatico se van a leer 5 estaos los cuales
        * servirán para mover de manera automática el robot.
       */
       while( Serial.available() > 0 ){
-        /*byte numerito =  getNumber(data,0) ;
+        /*
+        data = Serial.readStringUntil('\n');
+        byte numerito =  getNumber(data,0) ;
         Serial.println( numerito );      
         status[0] = getNumber(data, 0);
         status[1] = getNumber(data, 1);
