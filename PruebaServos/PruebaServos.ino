@@ -1,4 +1,19 @@
+/*
+  Conexión de teclado matricial:
+ * Pin 1 a 3 digital de arduino
+ * Pin 2 a 2 digital de arduino
+ * Pin 3 a A5 digital de arduino
+ * Pin 4 a A4 digital de arduino 
+ * Pin 5 a A3 annalógico de arduino
+ * Pin 6 a A2 annalógico de arduino
+ * Pin 7 a A1 annalógico de arduino
+ * Pin 8 a A0 annalógico de arduino
+
+ */
+
+
 #include <Servo.h>
+#include <Keypad.h>
 
 #define PinSerPinza 6
 #define PinSerMuneca 7
@@ -21,6 +36,39 @@ int stepsPerRev = 4076;  // pasos para una vuelta completa
 const int numSteps = 8;
 const int stepsLookup[8] = { B1000, B1100, B0100, B0110, B0010, B0011, B0001, B1001 };
 
+
+
+//--------Teclado matricial--------
+//Definimos el número de renglones del teclado matricial
+const byte rowsLength = 4;
+//Definimos el número de columnas del teclado matricial
+const byte colsLength = 4;
+//Definimos los pines de los renglones que van conectados a arduino
+byte rowPin [rowsLength] = {3, 2, A5, A4};
+//Definimos los pines de las columnas que van conectados a arduino
+byte colPin [colsLength] = {A3,A2,A1,A0};
+
+//Definimos la matriz de char con el nombre de los bótones del teclado
+//Cambiar # por P y D por R para darle funcionalidad al bóton de paro.
+char keys[rowsLength][colsLength] = {
+  {'1', '2', '3' , 'A'},
+  {'4', '5', '6' , 'B'},
+  {'7', '8', '9' , 'C'},
+  {'*', '0', 'P' , 'R'}
+};
+//Inicializamos el teclado
+Keypad kb = Keypad( 
+  makeKeymap( keys ), 
+  rowPin,
+  colPin,
+  rowsLength,
+  colsLength
+);
+//Definimos una variable de tipo char para que muestre cual tecla fue presionada
+char keyPressed;
+
+
+
 void setup() {
   Srv_Pinza.attach(PinSerPinza);
   Srv_Muneca.attach(PinSerMuneca);
@@ -33,7 +81,7 @@ void setup() {
   pinMode(motorPin3, OUTPUT);
   pinMode(motorPin4, OUTPUT);
   
-  Srv_Pinza.write(0);
+  Srv_Pinza.write(10);
   Srv_Muneca.write(90);
   Srv_Codo.write(50);
   Srv_Hombro.write(130);
@@ -41,14 +89,14 @@ void setup() {
 }
 
 void loop() {
-  for (int x = 0; x <= 180; x += 1) {
+  for (int x = 10; x <= 100; x += 1) {
     Srv_Pinza.write(x);
     Srv_Muneca.write(x);
     Srv_Codo.write(x);
     Srv_Hombro.write(x);
     delay(50);
   }
-  for (int x = 180; x >= 0; x -= 1) {
+  for (int x = 100; x >= 10; x -= 1) {
     Srv_Pinza.write(x);
     Srv_Muneca.write(x);
     Srv_Codo.write(x);
