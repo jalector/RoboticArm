@@ -38,7 +38,7 @@ o "Grados de libertad" (DOF) que tienen.
 -La Muñeca hace que “gire” la Pinza.
 -La "Garra" o "Pinza" funciona abriendo o cerrándose para "agarrar cosas".
 
-![Imagen](EjemploBrazo.PNG)
+![Imagen](EjemploBrazo.png)
 
 Material
 --------
