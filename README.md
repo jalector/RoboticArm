@@ -69,8 +69,11 @@ Especificaciones técnicas del equipo
 
 Resultados de la Práctica
 -------------------------
-### Armado del circuito
+### Armado del circuito y Montaje del Robot
 
-
+![Imagen](Brazo1.jpg)
+![Imagen](Brazo2.jpg)
+![Imagen](Brazo3.jpg)
+![Imagen](Brazo4.jpg)
 
 ### Pruebas
