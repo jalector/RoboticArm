@@ -1,4 +1,4 @@
-//definicion de pins
+ //definicion de pins
 const int motorPin1 = 10;    // 28BYJ48 In1
 const int motorPin2 = 11;    // 28BYJ48 In2
 const int motorPin3 = 12;   // 28BYJ48 In3
