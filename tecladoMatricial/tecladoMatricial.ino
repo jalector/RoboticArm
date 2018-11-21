@@ -1,7 +1,7 @@
 /*
   Conexión de teclado matricial:
- * Pin 1 a 3 digital de arduino
- * Pin 2 a 2 digital de arduino
+ * Pin 1 a 4 digital de arduino
+ * Pin 2 a 3 digital de arduino
  * Pin 3 a A5 digital de arduino
  * Pin 4 a A4 digital de arduino 
  * Pin 5 a A3 annalógico de arduino
@@ -22,7 +22,7 @@
 #define PinSerMuneca 7
 #define PinSerCodo 8
 #define PinSerHombro 9
-//Definición de variable para interrupción
+//Definición de variables para interrupción
 #define stopButton 2
 volatile boolean stopped = false;
 //definicion de pins
@@ -101,7 +101,7 @@ Keypad kb = Keypad(
 char keyPressed;
 
 void setup() {
-  //Declaración de reed switch como pin de entrada
+  //Declaración de push button como pin de entrada
   pinMode(stopButton, INPUT);
   Srv_Hand.attach(PinSerPinza);
   Srv_Wrist.attach(PinSerMuneca);
@@ -127,8 +127,8 @@ void setup() {
 }
 
 void loop() {
-  //Interrupción controlada por la puerta(Reed Switch)
-  attachInterrupt(digitalPinToInterrupt(stopButton), interrupcion, RISING);
+  //Interrupción de paro controlada por el push button
+  attachInterrupt(digitalPinToInterrupt(stopButton), interruption, RISING);
   detachInterrupt(0);
   
   keyPressed = kb.getKey();
@@ -329,7 +329,7 @@ void setOutput(int step)
 }
 /*Función para la interrupción, Si la variable esta en false cambia a true para
   realizar lo anterior*/
-void interrupcion(){
+void interruption(){
   stopped = !stopped;
   Serial.println("Interrumpido");
 }
