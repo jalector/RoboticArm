@@ -15,12 +15,16 @@
 #include <EEPROM.h>
 #include <Keypad.h>
 #include <Servo.h>
+#include "LowPower.h"
 
 //Definición de variables para servos y motor a pasos
 #define PinSerPinza 6
 #define PinSerMuneca 7
 #define PinSerCodo 8
 #define PinSerHombro 9
+//Definición de variable para interrupción
+#define stopButton 2
+volatile boolean stopped = false;
 //definicion de pins
 const int motorPin1 = 10;   // 28BYJ48 In1
 const int motorPin2 = 11;   // 28BYJ48 In2
@@ -64,10 +68,8 @@ byte hand = 10;
  * manejar el brazo con los estados o bien con el
  * teclado matricial
 */
-boolean manual = true;
+boolean manual = false;
 boolean parar = false;
-
-
 
 //--------Teclado matricial--------
 //Definimos el número de renglones del teclado matricial
@@ -75,7 +77,7 @@ const byte rowsLength = 4;
 //Definimos el número de columnas del teclado matricial
 const byte colsLength = 4;
 //Definimos los pines de los renglones que van conectados a arduino
-byte rowPin [rowsLength] = {3, 2, A5, A4};
+byte rowPin [rowsLength] = {4, 3, A5, A4};
 //Definimos los pines de las columnas que van conectados a arduino
 byte colPin [colsLength] = {A3,A2,A1,A0};
 
@@ -99,6 +101,8 @@ Keypad kb = Keypad(
 char keyPressed;
 
 void setup() {
+  //Declaración de reed switch como pin de entrada
+  pinMode(stopButton, INPUT);
   Srv_Hand.attach(PinSerPinza);
   Srv_Wrist.attach(PinSerMuneca);
   Srv_Elbow.attach(PinSerCodo);
@@ -123,6 +127,10 @@ void setup() {
 }
 
 void loop() {
+  //Interrupción controlada por la puerta(Reed Switch)
+  attachInterrupt(digitalPinToInterrupt(stopButton), interrupcion, RISING);
+  detachInterrupt(0);
+  
   keyPressed = kb.getKey();
   if( keyPressed != NO_KEY ){
     Serial.println( keyPressed );
@@ -319,3 +327,10 @@ void setOutput(int step)
   digitalWrite(motorPin3, bitRead(stepsLookup[step], 2));
   digitalWrite(motorPin4, bitRead(stepsLookup[step], 3));
 }
+/*Función para la interrupción, Si la variable esta en false cambia a true para
+  realizar lo anterior*/
+void interrupcion(){
+  stopped = !stopped;
+  Serial.println("Interrumpido");
+}
+

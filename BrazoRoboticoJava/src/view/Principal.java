@@ -314,8 +314,8 @@ public class Principal extends JFrame {
         pnlPrincipal.add(lblImgBackground);
         add(pnlPrincipal);
         try {
-            //arduino.arduinoRXTX("COM7", 9600, listener);
-            arduino.arduinoRXTX("/dev/ttyACM0", 9600, listener);
+            arduino.arduinoRXTX("COM4", 9600, listener);
+            //arduino.arduinoRXTX("/dev/ttyACM0", 9600, listener);
         } catch (ArduinoException ex) {
             Logger.getLogger(Principal.class.getName()).log(Level.SEVERE, null, ex);
         }
