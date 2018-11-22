@@ -27,7 +27,6 @@ import jssc.SerialPortEventListener;
 import jssc.SerialPortEvent;
 import jssc.SerialPortException;
 
-
 public class Principal extends JFrame {
 
     //Declaración de variables para gestionar arduino
@@ -41,7 +40,7 @@ public class Principal extends JFrame {
     Rectangle robotPieces, btnLeft, btnRight;
     //Componentes para los bontones que controlan la posición del robot
     JPanel pnlPrincipal, pnlPosition;
-   
+
     //Componentes que muestran información sobre las instrucciones que se le darán al robot
     JLabel lblPosition, lblPosFoot, lblPosShoulder, lblPosElbow, lblPosWrist, lblPosHand;
     JTextField txtPosFoot, txtPosShoulder, txtPosElbow, txtPosWrist, txtPosHand;
@@ -57,7 +56,7 @@ public class Principal extends JFrame {
 
     JLabel lblImgBackground;
     JLabel lblRoboticArm;
-    
+
     ButtonController btnCtrl;
 
     //Creación del constructor de la clase
@@ -78,20 +77,20 @@ public class Principal extends JFrame {
 
     //Método create, dónde se inicializan todas las variables
     private void create() {
-        arduino = new PanamaHitek_Arduino( );
+        arduino = new PanamaHitek_Arduino();
         multi = new PanamaHitek_MultiMessage(1, arduino);
-        
+
         listener = new SerialPortEventListener() {
             @Override
             public void serialEvent(SerialPortEvent spe) {
                 try {
-                    if (multi.dataReceptionCompleted()) {                        
+                    if (multi.dataReceptionCompleted()) {
                         //--------------------------------------------------------
                         // Estos print sopara ver que enviá el arduino
                         System.out.print("[UNO]: ");
                         System.out.println(multi.getMessage(0));
                         //--------------------------------------------------------
-                        
+
                         multi.flushBuffer();
                     }
                 } catch (ArduinoException ex) {
@@ -101,8 +100,8 @@ public class Principal extends JFrame {
                 }
             }
         };
-        
-        btnCtrl = new ButtonController( );
+
+        btnCtrl = new ButtonController();
         //Establecer un tipo de letra para titulos
         wordType1 = new Font("", 1, 18);
         //Establecer un tipo de letra para etiquetas comunes
@@ -119,7 +118,7 @@ public class Principal extends JFrame {
         btnLeft = new Rectangle(10, 35, 40, 40);
         //Establecer en que posición estará el botón derecho
         btnRight = new Rectangle(80, 35, 40, 40);
-        
+
         pnlPrincipal = new JPanel();
         pnlPrincipal.setLayout(null);
         lblRoboticArm = new JLabel("Panel de control de brazo robotico");
@@ -168,11 +167,11 @@ public class Principal extends JFrame {
         rbtnManual.setFont(wordType2);
         rbtnManual.setBounds(215, 110, 100, 20);
         rbtnManual.addActionListener(btnCtrl);
-        groupRbtn = new ButtonGroup();   
+        groupRbtn = new ButtonGroup();
         groupRbtn.add(rbtnAutomatic);
         groupRbtn.add(rbtnManual);
         lblAutomation = new JLabel("Estados");
-        
+
         lblAutomation.setFont(wordType1);
         lblAutomation.setBounds(150, 170, 140, 30);
         dtmAutomation = new DefaultTableModel(null, colTable) {
@@ -186,21 +185,21 @@ public class Principal extends JFrame {
         scrollTable = new JScrollPane(tableAutomation);
         scrollTable.setBounds(10, 210, 380, 120);
         btnSend = new JButton(iconSend);
-        btnSend.setBounds(80,350,40,40);
+        btnSend.setBounds(80, 350, 40, 40);
         btnSend.addActionListener(btnCtrl);
         btnAdd = new JButton(iconAdd);
         btnAdd.setBounds(250, 350, 40, 40);
-        btnAdd.addActionListener( btnCtrl );
+        btnAdd.addActionListener(btnCtrl);
         btnDelete = new JButton(iconDelete);
         btnDelete.setBounds(330, 350, 40, 40);
-        btnDelete.addActionListener( btnCtrl );
+        btnDelete.addActionListener(btnCtrl);
         btnAbort = new JButton("Abortar");
         btnAbort.setFont(wordType2);
-        btnAbort.addActionListener( btnCtrl );
+        btnAbort.addActionListener(btnCtrl);
         btnAbort.setBounds(20, 560, 100, 30);
         btnResume = new JButton("Reanudar");
         btnResume.setFont(wordType2);
-        btnResume.addActionListener( btnCtrl );
+        btnResume.addActionListener(btnCtrl);
         btnResume.setBounds(280, 560, 100, 30);
         lblImgBackground = new JLabel(new ImageIcon("src/images/imgBackground.jpg"));
         lblImgBackground.setBounds(400, 5, 230, 230);
@@ -209,82 +208,117 @@ public class Principal extends JFrame {
     }
 
     public class ButtonController implements ActionListener {
+
         @Override
         public void actionPerformed(ActionEvent e) {
-            if( e.getSource( ) == btnAdd ){ this.addStatus(); } 
-            else if ( e.getSource( ) == btnDelete ) { this.deleteStatus( ); }
-            else if ( e.getSource( ) == rbtnAutomatic) { sendArduinoInfo("A"); }
-            else if ( e.getSource( ) == rbtnManual) { sendArduinoInfo("M"); }
-            else if ( e.getSource( ) == btnAbort) { sendArduinoInfo("P"); }
-            else if ( e.getSource( ) == btnResume) { sendArduinoInfo("R"); }
+            if (e.getSource() == btnAdd) {
+                this.addStatus();
+            } else if (e.getSource() == btnDelete) {
+                this.deleteStatus();
+            } else if (e.getSource() == btnSend) {
+                this.sendAllInfo();
+            } else if (e.getSource() == rbtnAutomatic) {
+                sendArduinoInfo("A");
+            } else if (e.getSource() == rbtnManual) {
+                sendArduinoInfo("M");
+            } else if (e.getSource() == btnAbort) {
+                sendArduinoInfo("P");
+            } else if (e.getSource() == btnResume) {
+                sendArduinoInfo("R");
+            }             
         }
-        
-        private void deleteStatus(){
-            dtmAutomation.removeRow( tableAutomation.getSelectedRow() );
-        } 
-        
+
+        private void sendAllInfo() {
+            int size = dtmAutomation.getRowCount();            
+            sendArduinoInfo("A\n");
+            for (int i = 0; i < size; i++) {
+                sendArduinoInfo(
+                        toTreeCharacter(dtmAutomation.getValueAt(i, 1).toString())
+                        + toTreeCharacter(dtmAutomation.getValueAt(i, 2).toString())
+                        + toTreeCharacter(dtmAutomation.getValueAt(i, 3).toString())
+                        + toTreeCharacter(dtmAutomation.getValueAt(i, 4).toString())
+                        + toTreeCharacter(dtmAutomation.getValueAt(i, 5).toString())+"\n"
+                );
+                System.out.println("[SEND] "+
+                        toTreeCharacter(dtmAutomation.getValueAt(i, 1).toString())
+                        + toTreeCharacter(dtmAutomation.getValueAt(i, 2).toString())
+                        + toTreeCharacter(dtmAutomation.getValueAt(i, 3).toString())
+                        + toTreeCharacter(dtmAutomation.getValueAt(i, 4).toString())
+                        + toTreeCharacter(dtmAutomation.getValueAt(i, 5).toString())
+                );
+            }
+        }
+
+        private void deleteStatus() {
+            dtmAutomation.removeRow(tableAutomation.getSelectedRow());
+        }
+
         /**
          * Verifica y añade un estado más al brazo
-         * 
+         *
          */
-        
-        private void addStatus( ) {
-             if( this.hasPositionValues() ){
-                    if( !this.validPosition( )){
-                        JOptionPane.showMessageDialog( rootPane, "Los valores deben estar entre 0 y 180.");
-                    } else {
-                          System.out.println("[JAVA] "+
-                                  toTreeCharacter(txtPosFoot.getText( ))
-                                + toTreeCharacter(txtPosShoulder.getText())
-                                + toTreeCharacter(txtPosElbow.getText())
-                                + toTreeCharacter(txtPosWrist.getText())
-                                + toTreeCharacter(txtPosHand.getText())
-                                );
-                          
-                        sendArduinoInfo(
-                                toTreeCharacter(txtPosFoot.getText( ))
-                                + toTreeCharacter(txtPosShoulder.getText())
-                                + toTreeCharacter(txtPosElbow.getText())
-                                + toTreeCharacter(txtPosWrist.getText())
-                                + toTreeCharacter(txtPosHand.getText())
-                        );
-                        
-                        dtmAutomation.addRow(new Object [] { 
-                            tableAutomation.getRowCount()+1,
-                            txtPosFoot.getText( ), 
-                            txtPosShoulder.getText(), 
-                            txtPosElbow.getText(),                            
-                            txtPosWrist.getText(), 
-                            txtPosHand.getText()
-                        });
-                    }
-                    
+        private void addStatus() {
+            if (this.hasPositionValues()) {
+                if (!this.validPosition()) {
+                    JOptionPane.showMessageDialog(rootPane, "Los valores deben estar entre 0 y 180.");
                 } else {
-                    JOptionPane.showMessageDialog(rootPane, "Debes primero llenar todos los campos para guardar");
+//                    System.out.println("[ADD] "
+//                            + toTreeCharacter(txtPosFoot.getText())
+//                            + toTreeCharacter(txtPosShoulder.getText())
+//                            + toTreeCharacter(txtPosElbow.getText())
+//                            + toTreeCharacter(txtPosWrist.getText())
+//                            + toTreeCharacter(txtPosHand.getText())
+//                    );
+
+//                        sendArduinoInfo(
+//                                toTreeCharacter(txtPosFoot.getText( ))
+//                                + toTreeCharacter(txtPosShoulder.getText())
+//                                + toTreeCharacter(txtPosElbow.getText())
+//                                + toTreeCharacter(txtPosWrist.getText())
+//                                + toTreeCharacter(txtPosHand.getText())
+//                        );
+//                        
+                    dtmAutomation.addRow(new Object[]{
+                        tableAutomation.getRowCount() + 1,
+                        txtPosFoot.getText(),
+                        txtPosShoulder.getText(),
+                        txtPosElbow.getText(),
+                        txtPosWrist.getText(),
+                        txtPosHand.getText()
+                    });
                 }
+
+            } else {
+                JOptionPane.showMessageDialog(rootPane, "Debes primero llenar todos los campos para guardar");
+            }
         }
-        private String toTreeCharacter(String txt){
-           return (txt.length() == 3)? txt: (txt.length() == 1)? "00"+txt : "0"+txt;
+
+        private String toTreeCharacter(String txt) {
+            return (txt.length() == 3) ? txt : (txt.length() == 1) ? "00" + txt : "0" + txt;
         }
-        private boolean hasPositionValues(){
-            return ( !txtPosFoot.getText( ).equals("") ) && 
-                   ( !txtPosElbow.getText( ).equals("") ) && 
-                   ( !txtPosShoulder.getText( ).equals("") ) && 
-                   ( !txtPosWrist.getText( ).equals("") ) && 
-                   ( !txtPosHand.getText( ).equals("") );
-        }        
-        private boolean validPosition ( ){
-           return (( this.isAcceptable( txtPosElbow.getText( ))) && 
-                   ( this.isAcceptable( txtPosShoulder.getText( ))) && 
-                   ( this.isAcceptable( txtPosWrist.getText( ))) && 
-                   ( this.isAcceptable( txtPosHand.getText( ))));
-        }        
-        private boolean isAcceptable( String value ) {
-            int number = Integer.parseInt( value );
-            return (number <= 180) &&(number >= 0 );
+
+        private boolean hasPositionValues() {
+            return (!txtPosFoot.getText().equals(""))
+                    && (!txtPosElbow.getText().equals(""))
+                    && (!txtPosShoulder.getText().equals(""))
+                    && (!txtPosWrist.getText().equals(""))
+                    && (!txtPosHand.getText().equals(""));
         }
-        
+
+        private boolean validPosition() {
+            return ((this.isAcceptable(txtPosElbow.getText()))
+                    && (this.isAcceptable(txtPosShoulder.getText()))
+                    && (this.isAcceptable(txtPosWrist.getText()))
+                    && (this.isAcceptable(txtPosHand.getText())));
+        }
+
+        private boolean isAcceptable(String value) {
+            int number = Integer.parseInt(value);
+            return (number <= 180) && (number >= 0);
+        }
+
     }
+
     //Método assemble, dónde se agregan todos los componentes a la vista
     private void assemble() {
         pnlPrincipal.add(lblRoboticArm);
@@ -310,20 +344,20 @@ public class Principal extends JFrame {
         add(btnAbort);
         add(btnResume);
         pnlPrincipal.add(pnlPosition);
-        
+
         pnlPrincipal.add(lblImgBackground);
         add(pnlPrincipal);
         try {
             //arduino.arduinoRXTX("COM7", 9600, listener);
-            arduino.arduinoRXTX("/dev/ttyACM0", 9600, listener);
+            arduino.arduinoRXTX("/dev/ttyUSB0", 9600, listener);
         } catch (ArduinoException ex) {
             Logger.getLogger(Principal.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
+
     private void sendArduinoInfo(String message) {
         try {
-             arduino.sendData(message);
+            arduino.sendData(message);
         } catch (Exception ex) {
             System.err.println("Error al tratar de enviar un mensaje");
             ex.printStackTrace();
@@ -331,12 +365,12 @@ public class Principal extends JFrame {
     }
 
     //Método launch, es el que lanza la aplicación
-    public void launch() {        
-        this.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
+    public void launch() {
+        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setSize(425, 650);
-        this.setLocationRelativeTo( null );
-        this.setResizable( false );
-        this.setVisible( true );
+        this.setLocationRelativeTo(null);
+        this.setResizable(false);
+        this.setVisible(true);
     }
 
     public static void main(String[] args) {

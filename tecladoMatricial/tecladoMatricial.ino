@@ -121,6 +121,7 @@ void setup() {
   // Configurar la comunicación serial.
   Serial.begin(9600);
 }
+int currentStatus = 0;
 
 void loop() {
   keyPressed = kb.getKey();
@@ -150,15 +151,16 @@ void loop() {
        * servirán para mover de manera automática el robot.
       */
       while( Serial.available() > 0 ){
-        /*
         data = Serial.readStringUntil('\n');
-        byte numerito =  getNumber(data,0) ;
-        Serial.println( numerito );      
-        status[0] = getNumber(data, 0);
-        status[1] = getNumber(data, 1);
-        status[2] = getNumber(data, 2);
-        status[3] = getNumber(data, 3);
-        status[4] = getNumber(data, 4); */
+        Serial.println( data );      
+        byte toSave [5];
+        toSave[0] = getNumber(data, 0);
+        toSave[1] = getNumber(data, 1);
+        toSave[2] = getNumber(data, 2);
+        toSave[3] = getNumber(data, 3);
+        toSave[4] = getNumber(data, 4); 
+        
+        saveStatus( toSave );
       }      
     }
     
@@ -215,7 +217,16 @@ void loop() {
     Nos vamos apoyar de una variable global la cual nos 
   ayude a saber cual es el estado que se debe ejecutar.*/
   else {
+    getStatus( currentStatus++ );    
     
+    Srv_Shoulder.write( status[1] );
+    Srv_Elbow.write( status[2] );
+    Srv_Wrist.write( status[3] );
+    Srv_Hand.write( status[4] );
+    delay( 1000 );
+    
+    Serial.print("[CS]:");
+    Serial.println( currentStatus );
   }
 }
 
@@ -230,9 +241,11 @@ byte getNumber( String text, int pos ){
 void saveStatus( byte toSave [ ] ){
   updateStatusSize( +statusSize );
   byte address = statusSize * 5;
-  for(byte i = address, e = 0; i < address + 5; i++, e++){
+  for(byte i = address, e = 0; i < address + 6; i++, e++){
     EEPROM.write( toSave[ e ], i+1 );
+    delay( 25 ); 
   }    
+  delay(300);
 }
 
 void deleteStatus(){  
@@ -247,10 +260,15 @@ void deleteStatus(){
 
 void getStatus(byte position){
     byte address = position * 5;
-    for(byte i = address, e = 0; i < address+ 5; i++, e++){
+    Serial.println("[Charged status]");
+    for(byte i = address, e = 0; i < address+ 6; i++, e++){
       status[e] = EEPROM.read( i+1 );
+      Serial.print(status[e]);
+      Serial.print(",");
+      delay( 25 );
     }
-    
+    Serial.println("");
+    delay( 250 );
 }
 
 /** 
