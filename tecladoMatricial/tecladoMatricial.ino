@@ -206,9 +206,11 @@ void loop() {
        * Sí el modo es autómatico se van a leer 5 estados los cuales
        * servirán para mover de manera automática el robot.
       */
+      statusSize = 0;
+      updateStatusSize(0);
       while( Serial.available() > 0 ){
         data = Serial.readStringUntil('\n');
-        Serial.println( data );      
+        Serial.println( data );              
         byte toSave [5];
         toSave[0] = getNumber(data, 0);
         toSave[1] = getNumber(data, 1);
@@ -216,8 +218,9 @@ void loop() {
         toSave[3] = getNumber(data, 3);
         toSave[4] = getNumber(data, 4); 
         
-        saveStatus( toSave );
-      }      
+        saveStatus( toSave );        
+      }
+      statusSize = getStatusSize();      
     }
     
   }
@@ -283,37 +286,55 @@ void loop() {
     Se utiliza una variable global la cual
   ayuda a saber cual es el estado que se debe ejecutar.*/
   else {
-    getStatus( currentStatus++ );    
+    getStatus( currentStatus ); 
+
+    Serial.print("Status: ");
+    Serial.print( status[0] );
+    Serial.print(", ");
     
-    Srv_Shoulder.write( status[1] );
+    Srv_Shoulder.write( status[1] );    
+    Serial.print( status[1] );
+    Serial.print(", ");
+    
     Srv_Elbow.write( status[2] );
-    Srv_Wrist.write( status[3] );
-    Srv_Hand.write( status[4] );
-    delay( 1000 );
+    Serial.print( status[2] );
+    Serial.print(", ");
     
-    Serial.print("[CS]:");
-    Serial.println( currentStatus );
+    Srv_Wrist.write( status[3] );
+    Serial.print( status[3] );
+    Serial.print(", ");
+    
+    Srv_Hand.write( status[4] );
+    Serial.print( status[4] );
+    
+    delay( 3000 );
+    
+    Serial.print("; [CS]:");
+    Serial.print( currentStatus );
+    Serial.print(";[SS]:");
+    Serial.println( statusSize );
+    if( currentStatus < statusSize-1 ) {
+      currentStatus++;
+    }else {
+      currentStatus = 0;
+    }
   }
 }
 
 //Método utilizado para obtener ????????????????????????????????????????
 byte getNumber( String text, int pos ){
-  return (byte)
-    text.substring(
-      (pos*3), 
-      (pos*3)+3
-    ).toInt();
+  return (byte)  text.substring( (pos*3), (pos*3)+3).toInt();
 }
 
 //Método utilizado para guardar un estado con las posiciones deseadas en los 5 motores del Brazo Robótico
-void saveStatus( byte toSave [ ] ){
-  updateStatusSize( +statusSize );
+void saveStatus( byte toSave [ ] ){  
   byte address = statusSize * 5;
-  for(byte i = address, e = 0; i < address + 6; i++, e++){
-    EEPROM.write( toSave[ e ], i+1 );
+  for(byte i = address, e = 0; i < address + 5; i++, e++){
+    EEPROM.write( i+1, toSave[ e ] );
     delay( 25 ); 
   }    
-  delay(300);
+  updateStatusSize( ++statusSize );
+  delay(30);
 }
 
 //Método utilizado para eliminar un estado con las posiciones de los motores del Brazo Robótico
@@ -321,7 +342,8 @@ void deleteStatus(){
   if( statusSize > 0 ){
     byte address = statusSize * 5;
     for(byte i = address; i < address + 5; i++){
-      EEPROM.write( 255, i+1 );
+      EEPROM.write( i+1, 255 );
+      delay( 10 ); 
     }
     updateStatusSize( --statusSize );
   }  
@@ -330,15 +352,10 @@ void deleteStatus(){
 //Método utilizado para obtener un estado con las posiciones deseadas en los 5 motores del Brazo Robótico
 void getStatus(byte position){
     byte address = position * 5;
-    Serial.println("[Charged status]");
-    for(byte i = address, e = 0; i < address+ 6; i++, e++){
-      status[e] = EEPROM.read( i+1 );
-      Serial.print(status[e]);
-      Serial.print(",");
-      delay( 25 );
+    for(byte i = address, e = 0; i < address+ 5; i++, e++){
+      status[e] = EEPROM.read( i+1 )%175;     
     }
-    Serial.println("");
-    delay( 250 );
+    delay( 5 );
 }
 
 /** 
@@ -352,7 +369,7 @@ void getStatus(byte position){
  
 //Método utilizado para actualizar en la memoria EEPROM la cantidad de estados guardados
 void updateStatusSize( byte newSize ){
-  EEPROM.write( newSize, addStatusSize );
+  EEPROM.write(addStatusSize, newSize);
 }
 
 /** 
@@ -393,11 +410,11 @@ void clearEEPROM( byte until ) {
   if( until > 0 ){
     int top = ( until * 5 ) + 1;
     for(byte i = 1; i < top ; i++){
-       EEPROM.write( 255, i);
+       EEPROM.write( 255, 0);
+       delay( 10 );
     }
   }
 }
-
 //Método para girar el motor a pasos en sentido a las manecillas del reloj
 void clockwise(){
   //Aumentar el contador de pasos
