@@ -1,0 +1,8 @@
+compile.on.save=true
+user.properties.file=/home/alector/.netbeans/8.2/build.properties
+<<<<<<< HEAD
+=======
+=======
+user.properties.file=C:\\Users\\Rafa Paniagua\\AppData\\Roaming\\NetBeans\\8.0.2\\build.properties
+>>>>>>> 6c4380a55d205ef60016a29abd8035bed06f0dd6
+>>>>>>> 970ca6b44aa19753f2a9131b3d94c6e485b1ecd1
