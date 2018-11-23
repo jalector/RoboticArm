@@ -1,4 +1,20 @@
 /*
+ * Ejemplo de estados para mover el robot y que agarre objetos
+ * Primero mover el motor a pasos y luego los servos
+ * Girar 90 grados y dejar la pinza abierta para 
+ * posteriormente agarrar el objeto
+ * Foot: 90: Shoulder: 50 Elbow: 130 Wrist: 90 Hand: 60
+ * 
+ * Cerrar la pinza para agarrar el objeto
+ * Foot: 0 Shoulder: 50 Elbow: 130 Wrist: 90 Hand: 20
+ * 
+ * Girar levantar el brazo para levantar el objeto
+ * Foot: 0 Shoulder: 80 Elbow: 130 Wrist: 90 Hand: 20
+ * 
+ * Girar el motor a a pasos 180 grados y posteriormente 
+ * soltar el objeto
+ * Foot: -180 Shoulder: 80 Elbow: 130 Wrist: 90 Hand: 50
+ * 
   Conexión de teclado matricial:
    Pin 1 a 4 digital de arduino
    Pin 2 a 3 digital de arduino
@@ -62,7 +78,7 @@ Servo Srv_Wrist, Srv_Elbow, Srv_Shoulder, Srv_Hand;
 //Definición de variables para controlar la velocidad y los pasos del motor a pasos
 int motorSpeed = 1200;   //variable para fijar la velocidad
 int stepCounter = 0;     // contador para los pasos
-int stepsPerRev = 4076;  // pasos para una vuelta completa
+int stepsPerRev = 4076;  // pasos para una vuelta completa 23
 
 //Datos necesarios para controlar la secuencia de bobinas del motor a pasos
 const int numSteps = 8;
@@ -99,7 +115,7 @@ byte hand = 10;
    manejar el brazo con los estados (modo automático)
    o bien con el teclado matricial (modo manual)
 */
-boolean manual = false;
+boolean manual = true;
 boolean parar = false;
 
 //--------Teclado matricial--------
@@ -262,7 +278,7 @@ void loop() {
         else if ( keyPressed == '4') {
           //Condiciones para limitar el movimiento del hombro: maximo 180 grados
           if (shoulder < 175) {
-            shoulder += 5;
+            shoulder += 10;
           } else if (shoulder <= 175) {
             shoulder = 180;
           }
@@ -274,7 +290,7 @@ void loop() {
         else if ( keyPressed == '5') {
           //Condiciones para limitar el movimiento del hombro: minimo 0 grados
           if (shoulder > 5) {
-            shoulder -= 5;
+            shoulder -= 10;
           } else if (shoulder <= 5) {
             shoulder = 0;
           }
@@ -286,7 +302,7 @@ void loop() {
         else if ( keyPressed == '7') {
           //Condiciones para limitar el movimiento del codo: maximo 180 grados
           if (elbow < 175) {
-            elbow += 5;
+            elbow += 10;
           } else if (elbow >= 175) {
             elbow = 180;
           }
@@ -298,7 +314,7 @@ void loop() {
         else if ( keyPressed == '8') {
           //Condiciones para limitar el movimiento del codo: minimo 0 grados
           if (elbow > 5) {
-            elbow -= 5;
+            elbow -= 10;
           } else if (elbow <= 5) {
             elbow = 0;
           }
@@ -310,7 +326,7 @@ void loop() {
         else if ( keyPressed == '3') {
           //Condiciones para limitar el movimiento de la muñeca: maximo 180 grados
           if (wrist < 175) {
-            wrist += 5;
+            wrist += 10;
           } else if (wrist >= 175) {
             wrist = 180;
           }
@@ -322,7 +338,7 @@ void loop() {
         else if ( keyPressed == 'A') {
           //Condiciones para limitar el movimiento de la muñeca: minimo 0 grados
           if (wrist > 5) {
-            wrist -= 5;
+            wrist -= 10;
           } else if (wrist <= 5) {
             wrist = 0;
           }
@@ -334,7 +350,7 @@ void loop() {
         else if ( keyPressed == '6') {
           //Condiciones para limitar el movimiento de la pinza: maximo 100 grados
           if (hand < 100) {
-            hand += 5;
+            hand += 10;
           } else if (hand >= 100) {
             hand = 100;
           }
@@ -346,7 +362,7 @@ void loop() {
         else if ( keyPressed == 'B') {
           //Condiciones para limitar el movimiento de la pinza: minimo 0 grados
           if (hand > 5) {
-            hand -= 5;
+            hand -= 10;
           } else if (hand <= 5) {
             hand = 0;
           }
@@ -354,6 +370,14 @@ void loop() {
           Serial.println(hand);
           Srv_Hand.write(hand);
         }
+        Serial.print("Shoulder: ");
+        Serial.print(shoulder);
+        Serial.print("Elbow: ");
+        Serial.print(elbow);
+        Serial.print("Wrist: ");
+        Serial.print(wrist);
+        Serial.print("Hand: ");
+        Serial.println(hand);
       }
     }
     /* En modo automático se le da un delay a cada uno
@@ -401,7 +425,6 @@ void loop() {
     if ( keyPressed != NO_KEY ) {
       // Enviamos la información de la tecla
       // La información es la contenida en el arreglo keys
-      Serial.println( keyPressed );
       //Sí el valor de esa tecla fue 'A'
       if ( keyPressed == 'R') {
         stopped = false;
