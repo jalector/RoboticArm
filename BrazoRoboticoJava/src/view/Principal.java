@@ -52,7 +52,7 @@ public class Principal extends JFrame {
     DefaultTableModel dtmAutomation;
     JScrollPane scrollTable;
     String colTable[] = {"Orden", "Base", "Hombro", "Codo", "Muñeca", "Mano"};
-    JButton btnAbort, btnResume, btnSend, btnAdd, btnDelete;
+    JButton btnResume, btnSend, btnAdd, btnDelete;
 
     JLabel lblImgBackground;
     JLabel lblRoboticArm;
@@ -163,6 +163,7 @@ public class Principal extends JFrame {
         rbtnAutomatic.setFont(wordType2);
         rbtnAutomatic.setBounds(105, 110, 100, 20);
         rbtnAutomatic.addActionListener(btnCtrl);
+        rbtnAutomatic.setSelected(true);
         rbtnManual = new JRadioButton("Manual");
         rbtnManual.setFont(wordType2);
         rbtnManual.setBounds(215, 110, 100, 20);
@@ -193,10 +194,6 @@ public class Principal extends JFrame {
         btnDelete = new JButton(iconDelete);
         btnDelete.setBounds(330, 350, 40, 40);
         btnDelete.addActionListener(btnCtrl);
-        btnAbort = new JButton("Abortar");
-        btnAbort.setFont(wordType2);
-        btnAbort.addActionListener(btnCtrl);
-        btnAbort.setBounds(20, 560, 100, 30);
         btnResume = new JButton("Reanudar");
         btnResume.setFont(wordType2);
         btnResume.addActionListener(btnCtrl);
@@ -221,9 +218,7 @@ public class Principal extends JFrame {
                 sendArduinoInfo("A");
             } else if (e.getSource() == rbtnManual) {
                 sendArduinoInfo("M");
-            } else if (e.getSource() == btnAbort) {
-                sendArduinoInfo("P");
-            } else if (e.getSource() == btnResume) {
+            }  else if (e.getSource() == btnResume) {
                 sendArduinoInfo("R");
             }             
         }
@@ -341,7 +336,6 @@ public class Principal extends JFrame {
         add(btnSend);
         add(btnAdd);
         add(btnDelete);
-        add(btnAbort);
         add(btnResume);
         pnlPrincipal.add(pnlPosition);
 
