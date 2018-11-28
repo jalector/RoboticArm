@@ -1,4 +1,4 @@
-Brazo Rob�tico de 5 Ejes
+Brazo Robótico de 5 Ejes
 ========================
 
 Autores
@@ -67,10 +67,32 @@ Especificaciones técnicas del equipo
 * Procesador: AMD Radeon R2
 * Memoria RAM: 8 GB
 
+Descripción de funcionalidad
+----------------------------
+
+1. Mediante la interfaz de software se puede seleccionar el modo automático o modo manual.
+
+2. Para que el modo automático el brazo robótico siga repitiendo la secuencia de pasos después de ser desconectado, es necesario guardar la información en la memoria EEPROM del Arduino.
+
+3. La tabla de estados que se encuentra en la interfaz nos sirve para mandar las posiciones que se moverán los servos y el motor a pasos a Arduino y enseguida se guarden en la memoria EEPROM para que la secuencia de estados se siga repitiendo indefinidamente, hasta que se le añadan nuevos estados.
+
+4. Se pueden añadir estados a la tabla, primero se tiene que llenar los cuadros de texto con los grados que se desea mover el brazo y después pulsando el botón de añadir, para quitar los estados, se pulsa el botón de quitar estados.
+
+5. Para que el modo automático entre en operación, es necesario tener la opción de “Automático”, activada y esta se encuentra en la parte superior izquierda, activada.
+
+6. El modo manual se controla con un teclado matricial, el cual añade o resta grados de movimiento al motor a pasos y a los servos.
+
+7. Para que el modo automático entre en operación, es necesario tener la opción de “Manual”, activada y esta se encuentra en la parte superior derecha.
+
+8. Si el botón físico de paro es presionado, el brazo detendrá la secuencia de estados que esta ejecutando y continuará hasta que se active en el teclado matricial, la opción de reanudar.
+
+
 Resultados de la Práctica
 -------------------------
 
 ### Interfaz de software hecha en JAVA
+
+Median
 
 ![Imagen](Evidencias/Interfaz1.jpg)
 ![Imagen](Evidencias/Interfaz2.jpg)
@@ -81,5 +103,3 @@ Resultados de la Práctica
 ![Imagen](Evidencias/Brazo2.jpg)
 ![Imagen](Evidencias/Brazo3.jpg)
 ![Imagen](Evidencias/Brazo4.jpg)
-
-### Pruebas
