@@ -1,20 +1,20 @@
 /*
- * Ejemplo de estados para mover el robot y que agarre objetos
- * Primero mover el motor a pasos y luego los servos
- * Girar 90 grados y dejar la pinza abierta para 
- * posteriormente agarrar el objeto
- * Foot: 90: Shoulder: 50 Elbow: 130 Wrist: 90 Hand: 60
- * 
- * Cerrar la pinza para agarrar el objeto
- * Foot: 0 Shoulder: 50 Elbow: 130 Wrist: 90 Hand: 20
- * 
- * Girar levantar el brazo para levantar el objeto
- * Foot: 0 Shoulder: 80 Elbow: 130 Wrist: 90 Hand: 20
- * 
- * Girar el motor a a pasos 180 grados y posteriormente 
- * soltar el objeto
- * Foot: -180 Shoulder: 80 Elbow: 130 Wrist: 90 Hand: 50
- * 
+   Ejemplo de estados para mover el robot y que agarre objetos
+   Primero mover el motor a pasos y luego los servos
+   Girar 90 grados y dejar la pinza abierta para
+   posteriormente agarrar el objeto
+   Foot: 90: Shoulder: 50 Elbow: 130 Wrist: 90 Hand: 60
+
+   Cerrar la pinza para agarrar el objeto
+   Foot: 0 Shoulder: 50 Elbow: 130 Wrist: 90 Hand: 20
+
+   Girar levantar el brazo para levantar el objeto
+   Foot: 0 Shoulder: 80 Elbow: 130 Wrist: 90 Hand: 20
+
+   Girar el motor a a pasos 180 grados y posteriormente
+   soltar el objeto
+   Foot: -180 Shoulder: 80 Elbow: 130 Wrist: 90 Hand: 50
+
   Conexión de teclado matricial:
    Pin 1 a 4 digital de arduino
    Pin 2 a 3 digital de arduino
@@ -94,28 +94,29 @@ volatile boolean stopped = false;
 unsigned char addStatusSize = 0;
 
 /** Este arreglo contiene la posición de cada motor*/
-byte status[5];
+byte status[ 6 ] = {0, 0, 130, 50, 90, 90};
 /** Variable que ayuda a conocer la cantidad de estados */
 byte statusSize;
 
 String data = "";
+byte pasos = 0;
 /**
    Variables que ayudan a manejar la posición
    de cada servo, así como la posición de
    la base (el motor a pasos).
-*/
-byte pasos = 0;
+
+
 byte shoulder = 130;
 byte elbow = 50;
 byte wrist = 90;
-byte hand = 10;
-
+byte hand = 20;
+*/
 /**
    Variable que nos ayuda a saber sí vamos a
    manejar el brazo con los estados (modo automático)
    o bien con el teclado matricial (modo manual)
 */
-boolean manual = true;
+boolean manual = false;
 boolean parar = false;
 
 //--------Teclado matricial--------
@@ -144,12 +145,13 @@ Keypad kb = Keypad(
               rowsLength,
               colsLength
             );
+            
 //Definimos una variable de tipo char para que muestre cual tecla fue presionada
 char keyPressed;
 
 //Definir pin de led
 const int led = 5;
-
+int currentStatus;
 void setup() {
   //Declaración de push button como pin de entrada para reconocer interrupción
   pinMode(stopButton, INPUT);
@@ -179,11 +181,12 @@ void setup() {
 
   //Inicializar led
   pinMode(led, OUTPUT);
-  
+
   // Configurar la comunicación serial.
   Serial.begin(9600);
+  currentStatus = 0;
 }
-int currentStatus = 0;
+
 
 void loop() {
   //Interrupción donde el puerto que interviene es el 2
@@ -194,19 +197,8 @@ void loop() {
 
   // Obtenemos el valor del teclado
   keyPressed = kb.getKey();
-  //Comprobamos sí una tecla fue presionada
-  /*if( keyPressed != NO_KEY ){
-    // Enviamos la información de la tecla
-    // La información es la contenida en el arreglo keys
-    Serial.println( keyPressed );
-    //Sí el valor de esa tecla fue 'A'
-    if( keyPressed == 'A'){
-
-    }
-    }*/
 
   if (!stopped) {
-
     //Verificar si se tiene información pendiente por revisar
     if (Serial.available( )) {
       //Fijar una espera para que el arduino lea toda la información del Serial
@@ -221,33 +213,42 @@ void loop() {
       */
       //Lectura de información recibida por el puerto serial hasta que encuentra un salto de línea
       data = Serial.readStringUntil('\n');
+      Serial.println( data );
       //Si se recibe una "M" se lleva a cabo el control manual del Brazo Robótico por medio del teclado matricial
       if ( data == "M" ) {
         manual = true;
         //Si se recibe una "A" se lleva a cabo el modo automático del Brazo Robótico
       } else if ( data == "A" ) {
         manual = false;
-        /**
-           Sí el modo es autómatico se van a leer 5 estados los cuales
-           servirán para mover de manera automática el robot.
-        */
+      } else if ( data == "D" ) {         
+        status[0] = 0;
+        status[1] = 0;
+        status[2] = 130 ;
+        status[3] = 50;
+        status[4] = 90;
+        status[5] = 90;
+      
         statusSize = 0;
         updateStatusSize(0);
-        while ( Serial.available() > 0 ) {
-          data = Serial.readStringUntil('\n');
-          Serial.println( data );
-          byte toSave [5];
-          toSave[0] = getNumber(data, 0);
-          toSave[1] = getNumber(data, 1);
-          toSave[2] = getNumber(data, 2);
-          toSave[3] = getNumber(data, 3);
-          toSave[4] = getNumber(data, 4);
+      } else if ( data == "N" ) {
+        data = Serial.readStringUntil('\n');
+        Serial.println( data );
+        
+        byte toSave [6];
+        toSave[0] = ( byte ) data.substring(0, 1).toInt();
+        
+        data = data.substring( 1 );        
+        toSave[1] = getNumber(data, 0);
+        toSave[2] = getNumber(data, 1);
+        toSave[3] = getNumber(data, 2);
+        toSave[4] = getNumber(data, 3);
+        toSave[5] = getNumber(data, 4);
+        
+        
 
-          saveStatus( toSave );
-        }
+        saveStatus( toSave );
         statusSize = getStatusSize();
       }
-
     }
     //Función que limpia el buffer de datos recibidos por el puerto serial
     Serial.flush();
@@ -255,21 +256,19 @@ void loop() {
       teclado para escribir en los servos. */
     if ( manual ) {
       //Apagar el led cuando este en modo manual
-      digitalWrite(led, LOW);
+      //digitalWrite(led, LOW);
+      noTone(led);
       //Comprobamos sí una tecla fue presionada
-      if ( keyPressed != NO_KEY ) {
-        Serial.println( keyPressed );
+      if ( keyPressed != NO_KEY ) {        
         if ( keyPressed == '1') {
           //Si se presiona la tecla "1" la base gira en sentido de las manecillas del reloj
-          for (int i = 0; i < 300; i++)
-          {
-            clockwise();
-            delayMicroseconds(motorSpeed);
+          for (int i = 0; i < 300; i++) {
+            clockwise( );
+            delayMicroseconds( motorSpeed );
           }
         } else if ( keyPressed == '2') {
           //Si se presiona la tecla "2" la base gira en sentido contrario a las manecillas del reloj
-          for (int i = 0; i < 300; i++)
-          {
+          for (int i = 0; i < 300; i++) {
             anticlockwise();
             delayMicroseconds(motorSpeed);
           }
@@ -277,107 +276,98 @@ void loop() {
         //Si se presiona la tecla "4" el hombro se eleva 5 grados
         else if ( keyPressed == '4') {
           //Condiciones para limitar el movimiento del hombro: maximo 180 grados
-          if (shoulder < 175) {
-            shoulder += 10;
-          } else if (shoulder <= 175) {
-            shoulder = 180;
+          if (status[ 2 ] < 175) {
+            status[ 2 ] += 10;
+          } else if ( status[ 2 ]  <= 175) {
+            status[ 2 ] = 180;
           }
           //Imprimir valor actual de los grados del hombro
-          Serial.println(shoulder);
-          Srv_Shoulder.write(shoulder);
+          Srv_Shoulder.write( status[ 2 ] );
         }
         //Si se presiona la tecla "5" el hombro baja 5 grados
         else if ( keyPressed == '5') {
           //Condiciones para limitar el movimiento del hombro: minimo 0 grados
-          if (shoulder > 5) {
-            shoulder -= 10;
-          } else if (shoulder <= 5) {
-            shoulder = 0;
+          if ( status[ 2 ] > 5) {
+            status[ 2 ] -= 10;
+          } else if (status[ 2 ] <= 5) {
+            status[ 2 ] = 0;
           }
           //Imprimir valor actual de los grados del hombro
-          Serial.println(shoulder);
-          Srv_Shoulder.write(shoulder);
+          Srv_Shoulder.write( status[ 2 ] );
         }
         //Si se presiona la tecla "7" el codo se eleva 5 grados
         else if ( keyPressed == '7') {
           //Condiciones para limitar el movimiento del codo: maximo 180 grados
-          if (elbow < 175) {
-            elbow += 10;
-          } else if (elbow >= 175) {
-            elbow = 180;
+          if (status[ 3 ] < 175) {
+            status[ 3 ] += 10;
+          } else if ( status[ 3 ] >= 175) {
+            status[ 3 ] = 180;
           }
           //Imprimir valor actual de los grados del codo
-          Serial.println(elbow);
-          Srv_Elbow.write(elbow);
+          Srv_Elbow.write( status[ 3 ] );
         }
         //Si se presiona la tecla "8" el codo baja 5 grados
         else if ( keyPressed == '8') {
           //Condiciones para limitar el movimiento del codo: minimo 0 grados
-          if (elbow > 5) {
-            elbow -= 10;
-          } else if (elbow <= 5) {
-            elbow = 0;
+          if (status[ 3 ] > 5) {
+            status[ 3 ] -= 10;
+          } else if (status[ 3 ] <= 5) {
+            status[ 3 ] = 0;
           }
           //Imprimir valor actual de los grados del codo
-          Serial.println(elbow);
-          Srv_Elbow.write(elbow);
+          Srv_Elbow.write( status[ 3 ] );
         }
         //Si se presiona la tecla "3" la muneca gira 5 grados hacia la derecha
         else if ( keyPressed == '3') {
           //Condiciones para limitar el movimiento de la muñeca: maximo 180 grados
-          if (wrist < 175) {
-            wrist += 10;
-          } else if (wrist >= 175) {
-            wrist = 180;
+          if (status[ 4 ] < 175) {
+            status[ 4 ] += 10;
+          } else if (status[ 4 ] >= 175) {
+            status[ 4 ] = 180;
           }
           //Imprimir valor actual de los grados de la muñeca
-          Serial.println(wrist);
-          Srv_Wrist.write(wrist);
+          Srv_Wrist.write( status[ 4 ] );
         }
         //Si se presiona la tecla "A" la muneca gira 5 grados hacia la izquierda
         else if ( keyPressed == 'A') {
           //Condiciones para limitar el movimiento de la muñeca: minimo 0 grados
-          if (wrist > 5) {
-            wrist -= 10;
-          } else if (wrist <= 5) {
-            wrist = 0;
+          if (status[ 4 ] > 5) {
+            status[ 4 ] -= 10;
+          } else if (status[ 4 ] <= 5) {
+            status[ 4 ] = 0;
           }
           //Imprimir valor actual de los grados de la muñeca
-          Serial.println(wrist);
-          Srv_Wrist.write(wrist);
+          Srv_Wrist.write( status[ 4 ] );
         }
         //Si se presiona la tecla "6" la pinza se abre 5 grados
         else if ( keyPressed == '6') {
           //Condiciones para limitar el movimiento de la pinza: maximo 100 grados
-          if (hand < 100) {
-            hand += 10;
-          } else if (hand >= 100) {
-            hand = 100;
+          if ( status[ 5 ]  <= 100) {
+            status[ 5 ] += 10;
           }
           //Imprimir valor actual de los grados de la pinza
-          Serial.println(hand);
-          Srv_Hand.write(hand);
+          Srv_Hand.write( status[ 5 ] );
         }
         //Si se presiona la tecla "B" la pinza se cierra 5 grados
         else if ( keyPressed == 'B') {
           //Condiciones para limitar el movimiento de la pinza: minimo 0 grados
-          if (hand > 5) {
-            hand -= 10;
-          } else if (hand <= 5) {
-            hand = 0;
+          if (status[ 5 ] > 5) {
+            status[ 5 ] -= 10;
+          } else if (status[ 5 ] <= 5) {
+            status[ 5 ] = 0;
           }
           //Imprimir valor actual de los grados de la pinza
-          Serial.println(hand);
-          Srv_Hand.write(hand);
+          //Serial.println(hand);
+          Srv_Hand.write( status[ 5 ] );
         }
-        Serial.print("Shoulder: ");
-        Serial.print(shoulder);
-        Serial.print("Elbow: ");
-        Serial.print(elbow);
-        Serial.print("Wrist: ");
-        Serial.print(wrist);
-        Serial.print("Hand: ");
-        Serial.println(hand);
+        Serial.print("[S]");
+        Serial.print(status[2]);
+        Serial.print(" [E]: ");
+        Serial.print(status[3]);
+        Serial.print(" [W]");
+        Serial.print(status[4]);
+        Serial.print(" [H]");
+        Serial.println(status[5]);
       }
     }
     /* En modo automático se le da un delay a cada uno
@@ -386,34 +376,54 @@ void loop() {
       ayuda a saber cual es el estado que se debe ejecutar.*/
     else {
       //Encender el led cuando este en modo automatico
-      digitalWrite(led, HIGH);
-      getStatus( currentStatus );
-
+      //digitalWrite(led, HIGH);
+      tone(led,400);
+      
+      if( statusSize > 0 ){
+        getStatus( currentStatus );  
+      }
+      
       Serial.print("Status: ");
-      Serial.print( status[0] );
+      if( !status[0]  ) {
+        for (int i = 0, e = status[1] * 16; i < e; i++) {
+            anticlockwise( );
+            delayMicroseconds( motorSpeed );
+          }
+      } else {
+          for (int i = 0, e = status[1] * 16; i < e; i++) {
+            clockwise( );
+            delayMicroseconds( motorSpeed );
+          }
+      }
+      Serial.print( status[1] * 16 );
       Serial.print(", ");
 
-      Srv_Shoulder.write( status[1] );
-      Serial.print( status[1] );
-      Serial.print(", ");
-
-      Srv_Elbow.write( status[2] );
+      Srv_Shoulder.write( status[2] );
       Serial.print( status[2] );
       Serial.print(", ");
 
-      Srv_Wrist.write( status[3] );
+      Srv_Elbow.write( status[3] );
       Serial.print( status[3] );
       Serial.print(", ");
 
-      Srv_Hand.write( status[4] );
+      Srv_Wrist.write( status[4] );
       Serial.print( status[4] );
+      Serial.print(", ");
 
-      delay( 3000 );
+      Srv_Hand.write( status[5] );
+      Serial.print( status[5] );
+       
+      //digitalWrite(led, LOW);
+      noTone(led);
+      
 
       Serial.print("; [CS]:");
       Serial.print( currentStatus );
       Serial.print(";[SS]:");
       Serial.println( statusSize );
+
+      delay( 1500 );
+      
       if ( currentStatus < statusSize - 1 ) {
         currentStatus++;
       } else {
@@ -433,38 +443,50 @@ void loop() {
   }
 }
 
-//Método utilizado para obtener ????????????????????????????????????????
 byte getNumber( String text, int pos ) {
   return (byte)  text.substring( (pos * 3), (pos * 3) + 3).toInt();
 }
 
-//Método utilizado para guardar un estado con las posiciones deseadas en los 5 motores del Brazo Robótico
+/* Método utilizado para guardar un estado con las posiciones 
+deseadas en los 5 motores del Brazo Robótico */
 void saveStatus( byte toSave [ ] ) {
-  byte address = statusSize * 5;
-  for (byte i = address, e = 0; i < address + 5; i++, e++) {
-    EEPROM.write( i + 1, toSave[ e ] );
-    delay( 25 );
+  // Avanzamos hasta la nueva posicion que quermos guardar
+  byte address = ( statusSize * 6 ) +1; /* Adelantamos la posicioń
+  para tomar el desface causado por la primera posición */
+  // Guardamos el signo de la base 
+  EEPROM.write( address, toSave[ 0 ] ); 
+  // Avanzamos esa posición
+  address++;
+  // Guardamos cada posición de manera normal
+  
+  EEPROM.write( address, ( byte ) (toSave[1] * 0.7) ); 
+  address++;
+  for (byte i = address, e = 2; i < address + 5; i++, e++) {
+    EEPROM.write( i, toSave[ e ] );
+    delay( 5 );
   }
   updateStatusSize( ++statusSize );
-  delay(30);
+  delay(3);
 }
 
-//Método utilizado para eliminar un estado con las posiciones de los motores del Brazo Robótico
+/* Método utilizado para eliminar un estado con las posiciones 
+de los motores del Brazo Robótico */
 void deleteStatus() {
   if ( statusSize > 0 ) {
-    byte address = statusSize * 5;
-    for (byte i = address; i < address + 5; i++) {
+    byte address = statusSize * 6;
+    for (byte i = address; i < address + 6; i++) {
       EEPROM.write( i + 1, 255 );
-      delay( 10 );
+      delay( 5 );
     }
     updateStatusSize( --statusSize );
   }
 }
 
-//Método utilizado para obtener un estado con las posiciones deseadas en los 5 motores del Brazo Robótico
-void getStatus(byte position) {
-  byte address = position * 5;
-  for (byte i = address, e = 0; i < address + 5; i++, e++) {
+/* Método utilizado para obtener un estado con las posiciones 
+   deseadas en los 5 motores del Brazo Robótico */
+void getStatus( byte position ) {
+  byte address = position * 6;
+  for (byte i = address, e = 0; i < address + 6; i++, e++) {
     status[e] = EEPROM.read( i + 1 ) % 175;
   }
   delay( 5 );
@@ -479,27 +501,23 @@ void getStatus(byte position) {
           de estados guardados en EEPROM.
 */
 
-//Método utilizado para actualizar en la memoria EEPROM la cantidad de estados guardados
+/* Método utilizado para actualizar en la memoria EEPROM la 
+   cantidad de estados guardados */
 void updateStatusSize( byte newSize ) {
   EEPROM.write(addStatusSize, newSize);
 }
 
-/**
-    @author Juda Alector
-    @since Nov 13, 2018
-    @desc Ayuda a saber la cantidad de estados que están
-          guardados en la memoria.
-*/
+/* Ayuda a saber la cantidad de estados que están
+   guardados en la memoria. */
 
-//Método utilizado para obtener la cantidad de estados que están guardados en la memoria EEPROM
+/*Método utilizado para obtener la cantidad de estados que están guardados 
+  en la memoria EEPROM */
 byte getStatusSize( ) {
   byte amountOfStatus = EEPROM.read( addStatusSize );
   return ( amountOfStatus == 255 ) ? 0 : amountOfStatus;
 }
 
-/**
-    @author Juda Alector
-    @since Nov 13, 2018
+/**   
     @desc Método que pone en alto los bits de la memoria
     @param ( until ) valor de 0 a 255 que nos permmite borrar bloques
           de 5 en 5 en la memoria. Ejem. Sï se da 4, el borrara
@@ -510,14 +528,16 @@ byte getStatusSize( ) {
     a llamar constantemente los datos no se guardarán como se
     epsera.
 */
+/* Método utilizado para poner en alto los bits de la memoria EEPROM
+   Recibe un valor de 0 a 255 que nos permmite borrar bloques de 5 en 5 
+   en la memoria.
+   
+  Ejem: -Sï recibe un 4 se borrarán 20 bytes de la memoria
+      -Si recibe un 5 se borrarán 25 bytes de la memoria
 
-//Método utilizado para poner en alto los bits de la memoria EEPROM
-//Recibe un valor de 0 a 255 que nos permmite borrar bloques de 5 en 5 en la memoria.
-//Ejem: -Sï recibe un 4 se borrarán 20 bytes de la memoria
-//      -Si recibe un 5 se borrarán 25 bytes de la memoria
-
-//IMPORTANTE: Este método sólo debe usarse cuando se quiera borrar los datos de la memoria
-//Sí se manda llamar constantemente los datos no se guardarán como se espera
+  IMPORTANTE: Este método sólo debe usarse cuando se quiera borrar los datos 
+  de la memoria. Sí se manda llamar constantemente los datos no se guardarán 
+  como se espera */
 void clearEEPROM( byte until ) {
   if ( until > 0 ) {
     int top = ( until * 5 ) + 1;
@@ -527,32 +547,37 @@ void clearEEPROM( byte until ) {
     }
   }
 }
-//Método para girar el motor a pasos en sentido a las manecillas del reloj
+
+/* Método para girar el motor a pasos en sentido a las manecillas del reloj  */
 void clockwise() {
   //Aumentar el contador de pasos
   stepCounter++;
   if (stepCounter >= numSteps) stepCounter = 0;
   setOutput(stepCounter);
 }
-//Método para girar el motor a pasos en sentido contrario a las manecillas del reloj
+
+/* Método para girar el motor a pasos en sentido contrario a las manecillas 
+  del reloj  */
 void anticlockwise() {
   //Disminuir el contador de pasos
   stepCounter--;
   if (stepCounter < 0) stepCounter = numSteps - 1;
   setOutput(stepCounter);
 }
-//Método utilizado para mover las bobinas del motor a pasos dependiendo del número de paso recibido
-void setOutput(int step)
-{
+
+/* Método utilizado para mover las bobinas del motor a pasos 
+   dependiendo del número de paso recibido */
+void setOutput(int step) {
   digitalWrite(motorPin1, bitRead(stepsLookup[step], 0));
   digitalWrite(motorPin2, bitRead(stepsLookup[step], 1));
   digitalWrite(motorPin3, bitRead(stepsLookup[step], 2));
   digitalWrite(motorPin4, bitRead(stepsLookup[step], 3));
 }
 
-//Método utilizado para controlar la interrupción mediante el botón de paro de emergencia
+/* Método utilizado para controlar la interrupción mediante el botón de paro 
+   de emergencia */
 void interruption() {
   //Si la variable está en false cambia a true y viceversa, para revertir el estado actual
   stopped = true;
-  Serial.println("Interrumpido");
+  //Serial.println("Interrumpido");
 }

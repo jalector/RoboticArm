@@ -213,66 +213,53 @@ public class Principal extends JFrame {
             } else if (e.getSource() == btnDelete) {
                 this.deleteStatus();
             } else if (e.getSource() == btnSend) {
-                this.sendAllInfo();
+
             } else if (e.getSource() == rbtnAutomatic) {
                 sendArduinoInfo("A");
             } else if (e.getSource() == rbtnManual) {
                 sendArduinoInfo("M");
-            }  else if (e.getSource() == btnResume) {
+            } else if (e.getSource() == btnResume) {
                 sendArduinoInfo("R");
-            }             
-        }
-
-        private void sendAllInfo() {
-            int size = dtmAutomation.getRowCount();            
-            sendArduinoInfo("A\n");
-            for (int i = 0; i < size; i++) {
-                sendArduinoInfo(
-                        toTreeCharacter(dtmAutomation.getValueAt(i, 1).toString())
-                        + toTreeCharacter(dtmAutomation.getValueAt(i, 2).toString())
-                        + toTreeCharacter(dtmAutomation.getValueAt(i, 3).toString())
-                        + toTreeCharacter(dtmAutomation.getValueAt(i, 4).toString())
-                        + toTreeCharacter(dtmAutomation.getValueAt(i, 5).toString())+"\n"
-                );
-                System.out.println("[SEND] "+
-                        toTreeCharacter(dtmAutomation.getValueAt(i, 1).toString())
-                        + toTreeCharacter(dtmAutomation.getValueAt(i, 2).toString())
-                        + toTreeCharacter(dtmAutomation.getValueAt(i, 3).toString())
-                        + toTreeCharacter(dtmAutomation.getValueAt(i, 4).toString())
-                        + toTreeCharacter(dtmAutomation.getValueAt(i, 5).toString())
-                );
             }
         }
 
         private void deleteStatus() {
-            dtmAutomation.removeRow(tableAutomation.getSelectedRow());
+            sendArduinoInfo("D\n");
+            for (int i = 0, e = tableAutomation.getRowCount(); i < e; i++) {
+                dtmAutomation.removeRow(0);
+            }
         }
 
-        /**
-         * Verifica y añade un estado más al brazo
-         *
-         */
+        /** Verifica y añade un estado más al brazo */
         private void addStatus() {
             if (this.hasPositionValues()) {
                 if (!this.validPosition()) {
                     JOptionPane.showMessageDialog(rootPane, "Los valores deben estar entre 0 y 180.");
                 } else {
-//                    System.out.println("[ADD] "
-//                            + toTreeCharacter(txtPosFoot.getText())
-//                            + toTreeCharacter(txtPosShoulder.getText())
-//                            + toTreeCharacter(txtPosElbow.getText())
-//                            + toTreeCharacter(txtPosWrist.getText())
-//                            + toTreeCharacter(txtPosHand.getText())
-//                    );
-
-//                        sendArduinoInfo(
-//                                toTreeCharacter(txtPosFoot.getText( ))
-//                                + toTreeCharacter(txtPosShoulder.getText())
-//                                + toTreeCharacter(txtPosElbow.getText())
-//                                + toTreeCharacter(txtPosWrist.getText())
-//                                + toTreeCharacter(txtPosHand.getText())
-//                        );
-//                        
+                    /* Enviamos un nuevo estado hacia arduino para que lo almacene*/
+                    sendArduinoInfo("N\n");
+                    /* Analizamos el valor del motor a pasos para quep pueda se guardado
+                    en la memoria EEPROM de manera apropiada */
+                    String foot = txtPosFoot.getText();
+                    String sign = "1"; // Se envia uno sí es positivo
+                    /* Sí el valor es negativo agregaremos el signo a parte*/
+                    if (Integer.parseInt(foot) < 0) {
+                        sign = "0";// Se envia 0 sí el valor del número es negativo
+                        foot = foot.substring(1);
+                    }
+                    
+                    /* Enviamos la información a arduino */
+                    String newStatus = (
+                            sign + toThreeChar(foot)
+                            + toThreeChar(txtPosShoulder.getText())
+                            + toThreeChar(txtPosElbow.getText())
+                            + toThreeChar(txtPosWrist.getText())
+                            + toThreeChar(txtPosHand.getText())
+                    );
+                    
+                    sendArduinoInfo( newStatus );
+                    System.out.println( newStatus );
+                    /* Añadimos un nuevo renglon a nuestra interfaz*/
                     dtmAutomation.addRow(new Object[]{
                         tableAutomation.getRowCount() + 1,
                         txtPosFoot.getText(),
@@ -288,7 +275,7 @@ public class Principal extends JFrame {
             }
         }
 
-        private String toTreeCharacter(String txt) {
+        private String toThreeChar(String txt) {
             return (txt.length() == 3) ? txt : (txt.length() == 1) ? "00" + txt : "0" + txt;
         }
 
@@ -342,7 +329,7 @@ public class Principal extends JFrame {
         pnlPrincipal.add(lblImgBackground);
         add(pnlPrincipal);
         try {
-            arduino.arduinoRXTX("/dev/ttyACM1", 9600, listener);
+            arduino.arduinoRXTX("/dev/ttyACM0", 9600, listener);
         } catch (ArduinoException ex) {
             Logger.getLogger(Principal.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -357,7 +344,7 @@ public class Principal extends JFrame {
         }
     }
 
-    //Método launch, es el que lanza la aplicación
+    //Método launch5    5, es el que lanza la aplicación
     public void launch() {
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setSize(425, 650);
