@@ -67,6 +67,10 @@ Especificaciones técnicas del equipo
 * Procesador: AMD Radeon R2
 * Memoria RAM: 8 GB
 
+Diagrama de componentes
+-----------------------
+![Imagen](Evidencias/DiagramaComponentes.jpg)
+
 Descripción de funcionalidad
 ----------------------------
 
@@ -92,8 +96,6 @@ Resultados de la Práctica
 
 ### Interfaz de software hecha en JAVA
 
-Median
-
 ![Imagen](Evidencias/Interfaz1.jpg)
 ![Imagen](Evidencias/Interfaz2.jpg)
 
@@ -103,3 +105,6 @@ Median
 ![Imagen](Evidencias/Brazo2.jpg)
 ![Imagen](Evidencias/Brazo3.jpg)
 ![Imagen](Evidencias/Brazo4.jpg)
+![Imagen](Evidencias/Brazo5.jpg)
+![Imagen](Evidencias/Brazo6.jpg)
+![Imagen](Evidencias/Brazo7.jpg)
