@@ -69,7 +69,7 @@ Especificaciones técnicas del equipo
 
 Diagrama de componentes
 -----------------------
-![Imagen](Evidencias/DiagramaComponentes.jpg)
+![Imagen](Evidencias/DiagramaComponentes.png)
 
 Descripción de funcionalidad
 ----------------------------
